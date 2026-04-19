@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>ALBASRI TV | الموقع الرسمي لتطبيق البصري</title>
-    <meta name="description" content="حمل الآن تطبيق البصري تي في (ALBASRI TV) لمشاهدة أقوى المحتويات الرياضية والتقنية. المنصة الرسمية للمطور علي يعقوب (روميو).">
-    <meta name="keywords" content="البصري تي في, ALBASRI TV, تحميل تطبيق البصري, تطبيق Basri Pro, مشغل BSR Player, روميو, بث مباشر">
-    <meta name="author" content="Romeo">
+    <title>مكتبة الأفلام والمسلسلات | البصري TV</title>
+    <meta name="description" content="استعرض أحدث الأفلام والمسلسلات الحصرية على منصة البصري تي في. واجهة سريعة ومتجاوبة.">
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -31,189 +29,138 @@
             background: radial-gradient(circle at center, #0b214d 0%, #030712 100%);
             color: var(--text-main);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
         }
 
-        /* الحاوية الرئيسية المتجاوبة */
-        .main-card {
-            width: 100%;
-            max-width: 800px; /* عرض أكبر للكمبيوتر */
+        .header-nav {
+            max-width: 1200px;
+            margin: 0 auto 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
             background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(15px);
             border: 1px solid var(--border);
-            border-radius: 30px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            border-radius: 20px;
         }
 
-        .brand-logo {
-            width: 120px;
-            height: 120px;
-            border-radius: 25px;
-            margin-bottom: 15px;
-            border: 2px solid var(--primary);
-            padding: 5px;
-            background: #000;
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
-        }
-
-        h1 { font-size: clamp(24px, 5vw, 32px); font-weight: 900; margin-bottom: 10px; color: var(--primary); text-shadow: 0 2px 10px rgba(0,210,255,0.3); }
-        .tagline { color: var(--text-dim); margin-bottom: 30px; font-size: 16px; }
-
-        /* معرض الصور - متجاوب */
-        .preview-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 15px;
-            margin-bottom: 40px;
-        }
-        .preview-grid img {
-            width: 100%;
-            border-radius: 15px;
-            border: 1px solid var(--border);
-            cursor: pointer;
-        }
-        .preview-grid img:hover { transform: scale(1.05); border-color: var(--primary); }
-
-        /* الأزرار - جنبًا إلى جنب في الكمبيوتر وتحت بعض في الجوال */
-        .actions-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .btn {
+        .back-btn {
             text-decoration: none;
-            padding: 18px;
-            border-radius: 15px;
-            font-weight: 700;
+            color: var(--text-main);
+            font-size: 14px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-size: 16px;
+            gap: 8px;
         }
 
-        .btn-main { background: linear-gradient(135deg, var(--secondary), var(--primary)); color: #fff; box-shadow: 0 10px 20px rgba(0, 210, 255, 0.2); }
-        .btn-sub { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--border); }
-        
-        .btn:hover { transform: translateY(-3px); filter: brightness(1.2); }
+        .back-btn:hover { color: var(--primary); }
 
-        /* الأقسام الفرعية */
-        .services-section {
-            background: rgba(0,0,0,0.2);
-            padding: 25px;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h2 { text-align: center; margin-bottom: 30px; color: var(--primary); font-weight: 900; }
+
+        /* شبكة الأفلام */
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .movie-card {
+            background: var(--glass);
             border-radius: 20px;
             border: 1px solid var(--border);
-        }
-
-        .nav-links {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .nav-item {
-            text-decoration: none;
-            color: #fff;
-            padding: 8px 15px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-            font-size: 13px;
-            border: 1px solid var(--border);
-        }
-        .nav-item:hover { background: var(--primary); color: #000; }
-
-        /* كود الداونلودر */
-        .downloader-box {
-            margin-top: 30px;
-            padding: 20px;
-            border: 1px dashed var(--primary);
-            border-radius: 20px;
-        }
-        .code-display {
-            font-size: 35px;
-            font-weight: 900;
-            color: var(--primary);
-            letter-spacing: 5px;
+            overflow: hidden;
+            position: relative;
             cursor: pointer;
-            display: block;
-            margin: 10px 0;
         }
 
-        footer { margin-top: 40px; font-size: 12px; color: var(--text-dim); border-top: 1px solid var(--border); padding-top: 20px; }
+        .movie-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(0, 210, 255, 0.2);
+        }
 
-        /* تعديلات للهواتف الصغيرة */
+        .movie-card img {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+        }
+
+        .movie-info {
+            padding: 12px;
+            text-align: center;
+        }
+
+        .movie-info h3 { font-size: 14px; font-weight: 700; margin-bottom: 5px; }
+        .movie-info span { font-size: 12px; color: var(--text-dim); }
+
+        .quality-tag {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            font-size: 12px;
+            color: var(--text-dim);
+            border-top: 1px solid var(--border);
+        }
+
         @media (max-width: 480px) {
-            .main-card { padding: 25px 15px; }
-            .preview-grid { grid-template-columns: repeat(3, 1fr); }
+            .movies-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .movie-card img { height: 200px; }
         }
     </style>
 </head>
 <body>
 
-<div class="main-card">
-    <img src="https://up6.cc/2026/04/177610707754814.jpg" alt="Logo" class="brand-logo">
-    
-    <h1>البصري تيفي ALBASRI TV</h1>
-    <p class="tagline">المنصة الرسمية لتحميل تطبيقات البصري و BSR Player</p>
-
-    <div class="preview-grid">
-        <img src="https://up6.cc/2026/04/177610707742171.jpg" alt="Screen 1">
-        <img src="https://up6.cc/2026/04/177610707751573.jpg" alt="Screen 2">
-        <img src="https://up6.cc/2026/04/177610707748052.jpg" alt="Screen 3">
-    </div>
-
-    <div class="actions-group">
-        <a href="https://www.mediafire.com/file/aqv1m6qldnd3k7h/ALBASRI+TV.apk/file" class="btn btn-main">
-            <i class="fab fa-android"></i> تحميل التطبيق (APK)
-        </a>
-        <a href="https://play.google.com/store/apps/details?id=com.btv.video.player&hl=ar" class="btn btn-sub">
-            <i class="fab fa-google-play"></i> تحميل المشغل
-        </a>
-    </div>
-
-    <div class="services-section">
-        <p style="font-size: 14px; font-weight: bold; color: var(--primary);">خدماتنا الإضافية</p>
-        <div class="nav-links">
-            <a href="tv.html" class="nav-item"><i class="fas fa-film"></i> مكتبة الأفلام</a>
-            <a href="Basri_Pro_Player.html" class="nav-item"><i class="fas fa-star"></i> Basri Pro</a>
-            <a href="bsr_player.html" class="nav-item"><i class="fas fa-play-circle"></i> BTV Web</a>
-        </div>
-
-        <div class="downloader-box">
-            <p style="font-size: 12px; color: var(--text-dim);">كود تطبيق Downloader للشاشات الذكية</p>
-            <span class="code-display" id="copyCode" onclick="copyText()">1962664</span>
-            <p id="msg" style="font-size: 11px; color: var(--primary);">اضغط على الكود للنسخ</p>
-        </div>
-    </div>
-
-    <footer>
-        تطوير وبرمجة: علي يعقوب (ROMEO) &copy; 2026
-    </footer>
+<div class="header-nav">
+    <a href="index.html" class="back-btn"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
+    <div style="font-weight: 900; color: var(--primary);">ALBASRI TV</div>
 </div>
 
-<script>
-    function copyText() {
-        const code = document.getElementById('copyCode').innerText;
-        navigator.clipboard.writeText(code);
-        const msg = document.getElementById('msg');
-        msg.innerText = "تم النسخ بنجاح!";
-        msg.style.color = "#4ade80";
-        setTimeout(() => {
-            msg.innerText = "اضغط على الكود للنسخ";
-            msg.style.color = "#00d2ff";
-        }, 2000);
-    }
-</script>
+<div class="container">
+    <h2><i class="fas fa-film"></i> مكتبة الأفلام والمسلسلات</h2>
+
+    <div class="movies-grid">
+        <div class="movie-card" onclick="location.href='bsr_player.html?id=1'">
+            <span class="quality-tag">4K</span>
+            <img src="https://via.placeholder.com/300x450" alt="اسم الفيلم">
+            <div class="movie-info">
+                <h3>اسم الفيلم القادم</h3>
+                <span>أكشن | 2026</span>
+            </div>
+        </div>
+
+        <div class="movie-card" onclick="location.href='bsr_player.html?id=2'">
+            <span class="quality-tag">FHD</span>
+            <img src="https://via.placeholder.com/300x450" alt="اسم الفيلم">
+            <div class="movie-info">
+                <h3>مسلسل درامي جديد</h3>
+                <span>دراما | 2026</span>
+            </div>
+        </div>
+
+        </div>
+</div>
+
+<footer>
+    تطوير وبرمجة: علي يعقوب (ROMEO) &copy; 2026
+</footer>
 
 </body>
 </html>
