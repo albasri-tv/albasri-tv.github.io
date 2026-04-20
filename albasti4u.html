@@ -149,7 +149,28 @@
 <script>
     const player = new Plyr('#player');
     const API = "https://seres.albasriali1990.workers.dev/";
-    let current = { type: '', sec: '', page: 1, name: '' };
+    let current = { type: '', sec: '', page: 1, name: '', view: 'home' };
+
+    // --- إضافة نظام مراقبة زر الرجوع الذكي ---
+    window.onpopstate = function(event) {
+        if (event.state) {
+            if (event.state.view === 'home') {
+                showHome(false);
+            } else if (event.state.view === 'section') {
+                loadData(event.state.type, event.state.sec, event.state.page, event.state.name, false);
+            } else if (event.state.view === 'eps') {
+                closePlayer(false);
+                document.getElementById('eps-view').style.display = 'block';
+                document.getElementById('section-view').style.display = 'none';
+            }
+        } else {
+            showHome(false);
+        }
+        // إغلاق المشغل دائماً عند الرجوع إذا كان مفتوحاً
+        if (document.getElementById('watch-modal').style.display === 'flex') {
+            closePlayer(false);
+        }
+    };
 
     function toggleTheme() {
         const html = document.documentElement;
@@ -198,18 +219,24 @@
             html += `<div class="custom-card" onclick="loadData('${c.type}', '${c.id}', 1, '${c.name}')"><div class="card-img" style="background-image: url('${c.img}')"></div><div class="card-play"><i class="fas fa-folder-open"></i></div><div class="card-title">${c.name}</div></div>`;
         });
         document.getElementById('home-view').innerHTML = html;
+        // حفظ الحالة الرئيسية
+        history.replaceState({view: 'home'}, '');
     }
     initLauncher();
 
-    function showHome() {
+    function showHome(push = true) {
         document.getElementById('home-view').style.display = 'grid';
         document.getElementById('section-view').style.display = 'none';
         document.getElementById('eps-view').style.display = 'none';
         document.getElementById('search-bar').style.display = 'none';
+        current.view = 'home';
+        if(push) history.pushState({view: 'home'}, '');
     }
 
-    function loadData(type, sec, page, name = current.name) {
-        current = { type, sec, page, name }; 
+    function loadData(type, sec, page, name = current.name, push = true) {
+        current = { type, sec, page, name, view: 'section' }; 
+        if(push) history.pushState({view: 'section', type, sec, page, name}, '');
+
         document.getElementById('home-view').style.display = 'none';
         document.getElementById('section-view').style.display = 'block';
         document.getElementById('loader').style.display = 'block';
@@ -252,7 +279,8 @@
 
     function loadEpisodes(url, image, title) {
         document.getElementById('loader').style.display = 'block';
-        // تعديل: استخدام url بدلاً من targetUrl وتوقع مصفوفة مباشرة أو كائن
+        history.pushState({view: 'eps'}, ''); // حفظ حالة صفحة الحلقات
+
         fetch(`${API}?action=episodes&url=${encodeURIComponent(url)}`)
         .then(res => res.json()).then(data => {
             document.getElementById('loader').style.display = 'none';
@@ -261,7 +289,6 @@
             document.getElementById('series-title').innerText = title;
             const grid = document.getElementById('episodes-grid'); grid.innerHTML = '';
             
-            // معالجة إذا كانت البيانات مصفوفة مباشرة
             const episodes = Array.isArray(data) ? data : (data.episodes || []);
             episodes.forEach(ep => {
                 grid.innerHTML += `<div class="custom-card" onclick="openPlayer('${ep.name}'); fetchAndPlay('${ep.url || ep.episode_url}');"><div class="card-img" style="background-image: url('${image}')"></div><div class="card-play"><i class="fas fa-play"></i></div><div class="card-title">${ep.name}</div></div>`;
@@ -269,13 +296,16 @@
         }).catch(() => { document.getElementById('loader').style.display = 'none'; });
     }
 
-    function closeEps() { document.getElementById('eps-view').style.display = 'none'; document.getElementById('section-view').style.display = 'block'; }
+    function closeEps() { 
+        history.back(); // نستخدم التراجع الطبيعي
+    }
     
     function openPlayer(title) { 
         document.getElementById('watch-modal').style.display = 'flex'; 
         document.getElementById('video-title').innerText = title; 
         document.getElementById('player-loading').style.display = 'flex'; 
         document.body.style.overflow = 'hidden';
+        history.pushState({view: 'player'}, ''); // حفظ حالة المشغل
     }
 
     function fetchAndPlay(url) {
@@ -290,11 +320,12 @@
         });
     }
 
-    function closePlayer() { 
+    function closePlayer(pop = true) { 
         player.pause(); 
         document.getElementById('watch-modal').style.display = 'none'; 
         player.source = { type: 'video', sources: [] }; 
         document.body.style.overflow = 'auto';
+        if(pop) history.back();
     }
 </script>
 </body>
