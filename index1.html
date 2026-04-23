@@ -1,59 +1,28 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>البصري تي في - البث المباشر</title>
-    <style>
-        :root{--bg:#0b1220;--card:#1e293b;--text:#fff;--primary:#38bdf8}
-        body{background:var(--bg); color:var(--text); font-family:tahoma; padding:15px; margin:0;}
-        .container{max-width:600px; margin:auto;}
-        .match-item{background:var(--card); border-radius:15px; padding:15px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.1); cursor:pointer;}
-        .team{text-align:center; width:40%;}
-        .team img{width:50px; height:50px; object-fit:contain; margin-bottom:5px; background:#fff; border-radius:50%; padding:3px;}
-        .vs{color:var(--primary); font-weight:bold;}
-    </style>
-</head>
-<body>
-
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>جدول المباريات</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b1220;--card:rgba(17,24,39,.92);--card2:rgba(15,23,42,.96);--line:rgba(255,255,255,.10);--text:#fff;--muted:#cbd5e1;--blue:#38bdf8;--green:#10b981;--red:#ef4444}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;padding:14px;background:radial-gradient(circle at 90% 0,rgba(56,189,248,.18),transparent 28%),radial-gradient(circle at 5% 5%,rgba(16,185,129,.12),transparent 24%),var(--bg);font-family:Tajawal,Tahoma;color:var(--text)}.container{max-width:880px;margin:auto}.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-radius:22px;background:var(--card);border:1px solid var(--line);box-shadow:0 18px 45px rgba(0,0,0,.25);backdrop-filter:blur(12px);margin-bottom:16px}.title{font-size:19px;font-weight:900}.icon{width:44px;height:44px;border:0;border-radius:15px;background:var(--card2);border:1px solid var(--line);color:white;font-size:20px}.card{cursor:pointer;background:linear-gradient(180deg,rgba(30,41,59,.96),rgba(15,23,42,.96));border:1px solid var(--line);border-radius:24px;padding:16px;margin-bottom:15px;box-shadow:0 14px 35px rgba(0,0,0,.24);transition:.18s}.card:hover{transform:translateY(-2px);border-color:rgba(56,189,248,.45)}.match-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.team{width:35%;text-align:center}.team img{width:68px;height:68px;object-fit:contain}.team-name{font-weight:900;margin-top:7px;line-height:1.5}.center{width:30%;text-align:center}.time{font-size:18px;color:var(--blue);font-weight:900}.score{font-size:25px;font-weight:900}.badge{display:inline-flex;align-items:center;justify-content:center;margin-top:8px;border-radius:999px;padding:6px 13px;font-size:13px;font-weight:900}.league{margin-top:11px;text-align:center;color:var(--muted);font-size:13px}.empty{text-align:center;padding:34px;background:var(--card);border:1px solid var(--line);border-radius:22px;color:var(--muted);line-height:1.9}.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.68);z-index:50;padding:15px}.modal.show{display:flex}.modal-box{width:min(420px,100%);background:var(--card);border:1px solid var(--line);border-radius:24px;padding:20px;text-align:center;box-shadow:0 25px 70px rgba(0,0,0,.45)}.modal-title{font-weight:900;font-size:20px;margin-bottom:8px}.modal-text{color:var(--muted);line-height:1.8}.btn{border:0;border-radius:13px;padding:11px 18px;background:#2563eb;color:white;font-family:Tajawal;font-weight:900;margin-top:12px}@media(max-width:700px){.team img{width:55px;height:55px}.team-name{font-size:13px}.card{padding:12px}.title{font-size:17px}}
+</style>
+</head><body>
 <div class="container">
-    <h2 style="text-align:center;">مباريات جارية الآن</h2>
-    <div id="matches-container">جاري جلب المباريات المباشرة...</div>
+  <div class="topbar"><button class="icon" onclick="history.back()">→</button><div><div class="title">جدول المباريات</div><div style="color:#cbd5e1;font-size:13px">المباريات المرسلة من لوحة المسؤول</div></div><button class="icon" onclick="location.reload()">↻</button></div>
+  <div id="matches"></div>
 </div>
-
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<div class="modal" id="noServersModal"><div class="modal-box"><div class="modal-title">تنبيه</div><div class="modal-text">لا توجد سيرفرات مضافة لهذه المباراة حتى الآن.</div><button class="btn" onclick="closeNoServersModal()">حسناً</button></div></div>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyAGhmOqXWxmr2ULOzNMMDuLlxCeTmUNpis",
-        databaseURL: "https://frsin-araq-default-rtdb.firebaseio.com",
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    db.ref('live_matches').on('value', (snapshot) => {
-        const container = document.getElementById('matches-container');
-        container.innerHTML = '';
-        const data = snapshot.val();
-
-        if (data) {
-            Object.values(data).forEach(m => {
-                const payload = encodeURIComponent(JSON.stringify({
-                    title: m.home + " vs " + m.away,
-                    qualities: m.servers
-                }));
-                
-                container.innerHTML += `
-                    <div class="match-item" onclick="window.location.href='player.html?data=${payload}'">
-                        <div class="team"><img src="${m.imgH}"><div>${m.home}</div></div>
-                        <div class="vs">LIVE</div>
-                        <div class="team"><img src="${m.imgA}"><div>${m.away}</div></div>
-                    </div>`;
-            });
-        } else {
-            container.innerHTML = '<p style="text-align:center; color:#94a3b8;">لا توجد مباريات منشورة حالياً</p>';
-        }
-    });
+const firebaseConfig={apiKey:"AIzaSyAGhmOqXWxmr2ULOzNMMDuLlxCeTmUNpis",authDomain:"frsin-araq.firebaseapp.com",databaseURL:"https://frsin-araq-default-rtdb.firebaseio.com",projectId:"frsin-araq",storageBucket:"frsin-araq.firebasestorage.app",messagingSenderId:"813355696991",appId:"1:813355696991:web:4a58ec98591210bf77acea"};
+firebase.initializeApp(firebaseConfig); const db=firebase.database();
+const box=document.getElementById('matches'); const noServersModal=document.getElementById('noServersModal');
+function showNoServersModal(){noServersModal.classList.add('show')} function closeNoServersModal(){noServersModal.classList.remove('show')}
+function arTime(t){try{return new Date('2026-01-01T'+(t||'00:00')).toLocaleTimeString('ar-IQ',{hour:'numeric',minute:'2-digit',hour12:true}).replace('صباحًا','ص').replace('مساءً','م')}catch(e){return t||''}}
+function renderCard(m){const q=Array.isArray(m.qualities)?m.qualities:[]; const notStarted=(m.statusText==='لم تبدأ'); const center=notStarted?`<div class="time">${arTime(m.time)}</div>`:`<div class="score">${m.homeScore||0} - ${m.awayScore||0}</div>`; const payload={title:(m.home||'')+' VS '+(m.away||''),subtitle:(m.championship||'')+' • '+(m.time||''),defaultIndex:0,qualities:q}; const playerLink='player.html?data='+encodeURIComponent(JSON.stringify(payload)); const onClick=q.length?`location.href='${playerLink.replace(/'/g,"%27")}'`:`showNoServersModal()`; return `<div class="card" onclick="${onClick}"><div class="match-head"><div class="team"><img src="${m.homeLogo||''}"><div class="team-name">${m.home||''}</div></div><div class="center">${center}<div class="badge" style="background:${m.statusBg||'#10b981'}">${m.statusText||'لم تبدأ'}</div></div><div class="team"><img src="${m.awayLogo||''}"><div class="team-name">${m.away||''}</div></div></div>${m.championship?`<div class="league">${m.championship}</div>`:''}</div>`}
+db.ref('matches').on('value',snap=>{const data=snap.val()||{}; const list=Object.values(data).filter(m=>m&&m.published); if(!list.length){box.innerHTML='<div class="empty">لا توجد مباريات ظاهرة حالياً<br>عند إرسال مباراة من لوحة المسؤول ستظهر هنا مباشرة.</div>'; return;} list.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)); box.innerHTML=list.map(renderCard).join('');});
 </script>
-</body>
-</html>
+</body></html>
