@@ -3,7 +3,53 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>جدول المباريات</title>
+  <title> البصري تيغي للبث المياشر </title>
+  <meta name="description" content="مشاهدة مباريات اليوم بث مباشر بدون تقطيع، بث مباشر لجميع القنوات الرياضية، يلا شوت، كورة لايف، كورة ستار، بث مباشر HD لجميع المباريات.">
+
+<meta name="keywords" content="
+يلا شوت,
+yalla shoot,
+يلا شوت مباشر,
+yalla shoot live,
+كورة لايف,
+kora live,
+كورة ستار,
+koora star,
+كورة جول,
+kora goal,
+كورة اون لاين,
+kora online,
+يلا كورة,
+yalla kora,
+مباريات اليوم,
+matches today,
+بث مباشر,
+live streaming,
+بث مباشر مباريات,
+مشاهدة مباريات اليوم,
+بث مباشر بدون تقطيع,
+مشاهدة مباراة,
+live match,
+bein sport بث مباشر,
+قنوات بي ان سبورت,
+bein sport live,
+مشاهدة الدوري الانجليزي,
+مشاهدة الدوري الاسباني,
+مشاهدة دوري ابطال اوروبا,
+مشاهدة مباريات برشلونة,
+مشاهدة مباريات ريال مدريد,
+مشاهدة مباريات ليفربول,
+مشاهدة مباريات اليوم HD,
+مشاهدة مباريات مباشرة,
+live football,
+football live stream,
+soccer live,
+watch football online,
+free live streaming football
+">
+
+<meta name="author" content="BSR Player">
+<meta name="robots" content="index, follow">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -643,11 +689,23 @@ function normalizeServers(match){
 }
 
 function normalizeMatch(raw, key){
-  const homeObj = raw.home_team || raw.home || {};
-  const awayObj = raw.away_team || raw.away || {};
+  raw = raw || {};
 
-  const homeName = pick(raw, ["home_name", "homeTeam", "homeTitle"], "") || pick(homeObj, ["title", "name"], "الفريق الأول");
-  const awayName = pick(raw, ["away_name", "awayTeam", "awayTitle"], "") || pick(awayObj, ["title", "name"], "الفريق الثاني");
+  const homeObj = (raw.home_team && typeof raw.home_team === "object") ? raw.home_team : {};
+  const awayObj = (raw.away_team && typeof raw.away_team === "object") ? raw.away_team : {};
+
+  const homeText = typeof raw.home === "string" ? raw.home : "";
+  const awayText = typeof raw.away === "string" ? raw.away : "";
+
+  const homeName =
+    pick(raw, ["home_name", "homeName", "homeTeam", "homeTitle", "team1", "home_title"], "") ||
+    homeText ||
+    pick(homeObj, ["title", "name", "team_name"], "الفريق الأول");
+
+  const awayName =
+    pick(raw, ["away_name", "awayName", "awayTeam", "awayTitle", "team2", "away_title"], "") ||
+    awayText ||
+    pick(awayObj, ["title", "name", "team_name"], "الفريق الثاني");
 
   return {
     key,
