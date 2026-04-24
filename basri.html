@@ -90,7 +90,8 @@ watch soccer live hd
 <meta property="og:description" content="تابع مباريات اليوم والقنوات الرياضية بث مباشر بدون تقطيع عبر BSR Live.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ar_AR">
-  
+<meta name="theme-color" content="#0b1220">
+
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.13/shaka-player.compiled.js"></script>
@@ -534,6 +535,46 @@ video.fit-fill{object-fit:fill!important}
   font-weight:800;
 }
 .toast.show{display:block}
+
+.control-menu{
+  position:absolute;
+  left:12px;
+  bottom:78px;
+  z-index:1001;
+  min-width:190px;
+  max-height:240px;
+  overflow-y:auto;
+  background:rgba(0,0,0,.86);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:14px;
+  padding:6px;
+  display:none;
+  backdrop-filter:blur(10px);
+}
+.control-menu.show{display:block}
+.menu-item{
+  width:100%;
+  border:none;
+  background:transparent;
+  color:#fff;
+  padding:10px;
+  border-radius:10px;
+  font-family:'Tajawal';
+  font-weight:800;
+  text-align:right;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.menu-item:hover,.menu-item.active{background:rgba(255,255,255,.14)}
+.speed-text{
+  color:#fff;
+  font-size:13px;
+  font-weight:900;
+}
+
 </style>
 </head>
 
@@ -586,11 +627,21 @@ video.fit-fill{object-fit:fill!important}
       <div class="bottom-row">
         <div class="time-label" id="playerTime">LIVE</div>
         <div class="icon-row">
-          <button class="pbtn" id="muteBtn"><i data-feather="volume-2"></i></button>
-          <button class="pbtn" id="rotateBtn"><i data-feather="rotate-cw"></i></button>
+          <button class="pbtn" id="muteBtn" title="الصوت"><i data-feather="volume-2"></i></button>
+          <button class="pbtn" id="speedBtn" title="السرعة"><span class="speed-text">1x</span></button>
+          <button class="pbtn" id="qualityBtn" title="الجودة"><i data-feather="settings"></i></button>
+          <button class="pbtn" id="ccBtn" title="الترجمة"><i data-feather="message-square"></i></button>
+          <button class="pbtn" id="audioBtn" title="الصوت/اللغة"><i data-feather="globe"></i></button>
+          <button class="pbtn" id="fitBtnBottom" title="حجم الشاشة"><i data-feather="maximize-2"></i></button>
+          <button class="pbtn" id="rotateBtn" title="تدوير"><i data-feather="rotate-cw"></i></button>
         </div>
       </div>
     </div>
+
+    <div class="control-menu" id="qualityMenu"></div>
+    <div class="control-menu" id="subsMenu"></div>
+    <div class="control-menu" id="audioMenu"></div>
+    <div class="control-menu" id="speedMenu"></div>
   </div>
 </div>
 
@@ -628,6 +679,10 @@ document.addEventListener("DOMContentLoaded", function(){
   const progressPlayed = document.getElementById("progressPlayed");
   const playerTime = document.getElementById("playerTime");
   const toast = document.getElementById("toast");
+  const qualityMenu = document.getElementById("qualityMenu");
+  const subsMenu = document.getElementById("subsMenu");
+  const audioMenu = document.getElementById("audioMenu");
+  const speedMenu = document.getElementById("speedMenu");
 
   let shakaPlayer = null;
   let currentServers = [];
@@ -637,6 +692,10 @@ document.addEventListener("DOMContentLoaded", function(){
   let controlsTimer = null;
   let suppressVideoError = false;
   let directFallbackTried = false;
+  let selectedQualityHeight = null;
+  let selectedTextLang = null;
+  let selectedAudioLang = null;
+  let currentSpeed = 1;
 
   const fitModes = [
     {cls:"fit-contain", icon:"minimize-2", label:"ملاءمة"},
@@ -1002,6 +1061,175 @@ document.addEventListener("DOMContentLoaded", function(){
     errorOverlay.style.display = "none";
   }
 
+
+  function closeMenus(){
+    qualityMenu.classList.remove("show");
+    subsMenu.classList.remove("show");
+    audioMenu.classList.remove("show");
+    speedMenu.classList.remove("show");
+  }
+
+  function toggleMenu(menu){
+    const isOpen = menu.classList.contains("show");
+    closeMenus();
+    if(!isOpen) menu.classList.add("show");
+    showPlayerControls();
+  }
+
+  function buildQualityMenu(){
+    qualityMenu.innerHTML = "";
+
+    if(!shakaPlayer){
+      qualityMenu.innerHTML = '<button class="menu-item active"><span>غير متوفر</span></button>';
+      return;
+    }
+
+    const tracks = shakaPlayer.getVariantTracks()
+      .filter(function(t){ return t && t.height; })
+      .sort(function(a,b){ return (b.height || 0) - (a.height || 0); });
+
+    const heights = [];
+    tracks.forEach(function(t){
+      if(heights.indexOf(t.height) === -1) heights.push(t.height);
+    });
+
+    const autoBtn = document.createElement("button");
+    autoBtn.className = "menu-item" + (selectedQualityHeight === null ? " active" : "");
+    autoBtn.innerHTML = '<span>تلقائي</span><span>Auto</span>';
+    autoBtn.onclick = function(e){
+      e.stopPropagation();
+      selectedQualityHeight = null;
+      shakaPlayer.configure({abr:{enabled:true}});
+      closeMenus();
+      toastMsg("الجودة: تلقائي");
+      showPlayerControls();
+    };
+    qualityMenu.appendChild(autoBtn);
+
+    heights.forEach(function(h){
+      const btn = document.createElement("button");
+      btn.className = "menu-item" + (selectedQualityHeight === h ? " active" : "");
+      btn.innerHTML = '<span>' + h + 'p</span><span>HD</span>';
+      btn.onclick = function(e){
+        e.stopPropagation();
+        selectedQualityHeight = h;
+        shakaPlayer.configure({abr:{enabled:false}});
+        const match = shakaPlayer.getVariantTracks()
+          .filter(function(t){ return t.height === h; })
+          .sort(function(a,b){ return (b.bandwidth || 0) - (a.bandwidth || 0); })[0];
+        if(match) shakaPlayer.selectVariantTrack(match, true);
+        closeMenus();
+        toastMsg("الجودة: " + h + "p");
+        showPlayerControls();
+      };
+      qualityMenu.appendChild(btn);
+    });
+
+    if(!heights.length){
+      qualityMenu.innerHTML = '<button class="menu-item active"><span>الجودة حسب السيرفر</span></button>';
+    }
+  }
+
+  function buildSubsMenu(){
+    subsMenu.innerHTML = "";
+
+    if(!shakaPlayer){
+      subsMenu.innerHTML = '<button class="menu-item active"><span>لا توجد ترجمة</span></button>';
+      return;
+    }
+
+    const off = document.createElement("button");
+    off.className = "menu-item" + (!shakaPlayer.isTextTrackVisible() ? " active" : "");
+    off.innerHTML = '<span>إيقاف الترجمة</span>';
+    off.onclick = function(e){
+      e.stopPropagation();
+      selectedTextLang = null;
+      shakaPlayer.setTextTrackVisibility(false);
+      closeMenus();
+      toastMsg("الترجمة: إيقاف");
+      showPlayerControls();
+    };
+    subsMenu.appendChild(off);
+
+    const tracks = shakaPlayer.getTextTracks ? shakaPlayer.getTextTracks() : [];
+    tracks.forEach(function(t){
+      const lang = t.language || "und";
+      const btn = document.createElement("button");
+      btn.className = "menu-item" + (selectedTextLang === lang ? " active" : "");
+      btn.innerHTML = '<span>ترجمة: ' + lang.toUpperCase() + '</span>';
+      btn.onclick = function(e){
+        e.stopPropagation();
+        selectedTextLang = lang;
+        shakaPlayer.selectTextTrack(t);
+        shakaPlayer.setTextTrackVisibility(true);
+        closeMenus();
+        toastMsg("الترجمة: " + lang.toUpperCase());
+        showPlayerControls();
+      };
+      subsMenu.appendChild(btn);
+    });
+  }
+
+  function buildAudioMenu(){
+    audioMenu.innerHTML = "";
+
+    if(!shakaPlayer){
+      audioMenu.innerHTML = '<button class="menu-item active"><span>لا توجد لغات صوت</span></button>';
+      return;
+    }
+
+    const tracks = shakaPlayer.getVariantTracks ? shakaPlayer.getVariantTracks() : [];
+    const langs = [];
+
+    tracks.forEach(function(t){
+      const lang = (t.language || "").toLowerCase();
+      if(lang && langs.indexOf(lang) === -1) langs.push(lang);
+    });
+
+    if(!langs.length){
+      audioMenu.innerHTML = '<button class="menu-item active"><span>لا توجد لغات صوت</span></button>';
+      return;
+    }
+
+    langs.forEach(function(lang){
+      const btn = document.createElement("button");
+      btn.className = "menu-item" + (selectedAudioLang === lang ? " active" : "");
+      btn.innerHTML = '<span>الصوت: ' + lang.toUpperCase() + '</span>';
+      btn.onclick = function(e){
+        e.stopPropagation();
+        selectedAudioLang = lang;
+        shakaPlayer.configure({preferredAudioLanguage: lang});
+        const match = shakaPlayer.getVariantTracks()
+          .filter(function(t){ return (t.language || "").toLowerCase() === lang; })
+          .sort(function(a,b){ return (b.bandwidth || 0) - (a.bandwidth || 0); })[0];
+        if(match) shakaPlayer.selectVariantTrack(match, true);
+        closeMenus();
+        toastMsg("الصوت: " + lang.toUpperCase());
+        showPlayerControls();
+      };
+      audioMenu.appendChild(btn);
+    });
+  }
+
+  function buildSpeedMenu(){
+    speedMenu.innerHTML = "";
+    [0.5,0.75,1,1.25,1.5,2].forEach(function(sp){
+      const btn = document.createElement("button");
+      btn.className = "menu-item" + (currentSpeed === sp ? " active" : "");
+      btn.innerHTML = '<span>' + sp + 'x</span>';
+      btn.onclick = function(e){
+        e.stopPropagation();
+        currentSpeed = sp;
+        video.playbackRate = sp;
+        document.querySelector("#speedBtn .speed-text").textContent = sp + "x";
+        closeMenus();
+        toastMsg("السرعة: " + sp + "x");
+        showPlayerControls();
+      };
+      speedMenu.appendChild(btn);
+    });
+  }
+
   function buildServerButtons(){
     serverStrip.innerHTML = "";
 
@@ -1134,6 +1362,11 @@ document.addEventListener("DOMContentLoaded", function(){
       await video.play().catch(function(){});
 
       loading.style.display = "none";
+      video.playbackRate = currentSpeed;
+      buildQualityMenu();
+      buildSubsMenu();
+      buildAudioMenu();
+      buildSpeedMenu();
       setPlayIcon();
       showPlayerControls();
 
@@ -1289,6 +1522,36 @@ document.addEventListener("DOMContentLoaded", function(){
     video.style.transform = rotated ? "rotate(90deg) scale(1.02)" : "";
     video.style.transformOrigin = "center center";
     toastMsg(rotated ? "تم تفعيل التدوير" : "تم إيقاف التدوير");
+  };
+
+
+  document.getElementById("qualityBtn").onclick = function(e){
+    e.stopPropagation();
+    buildQualityMenu();
+    toggleMenu(qualityMenu);
+  };
+
+  document.getElementById("ccBtn").onclick = function(e){
+    e.stopPropagation();
+    buildSubsMenu();
+    toggleMenu(subsMenu);
+  };
+
+  document.getElementById("audioBtn").onclick = function(e){
+    e.stopPropagation();
+    buildAudioMenu();
+    toggleMenu(audioMenu);
+  };
+
+  document.getElementById("speedBtn").onclick = function(e){
+    e.stopPropagation();
+    buildSpeedMenu();
+    toggleMenu(speedMenu);
+  };
+
+  document.getElementById("fitBtnBottom").onclick = function(e){
+    e.stopPropagation();
+    document.getElementById("fitBtn").click();
   };
 
   document.getElementById("retryBtn").onclick = function(){
