@@ -4,11 +4,92 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<title>BSR LIVE</title>
+<title>البصري تيفي للبث المباشر </title>
 
-<meta name="description" content="مشاهدة مباريات اليوم بث مباشر بدون تقطيع، جدول مباريات اليوم، بث مباشر القنوات الرياضية.">
-<meta name="keywords" content="مباريات اليوم, بث مباشر, يلا شوت, كورة لايف, كورة ستار, يلا كورة, مشاهدة مباراة, bein sport live, live football">
+<meta name="description" content="مشاهدة مباريات اليوم بث مباشر بدون تقطيع، بث مباشر القنوات الرياضية HD، جدول مباريات اليوم، متابعة جميع الدوريات العالمية بجودة عالية.">
+
+<meta name="keywords" content="
+يلا شوت,
+yalla shoot,
+يلا شوت مباشر,
+yalla shoot live,
+يلا شوت الجديد,
+yalla shoot new,
+كورة لايف,
+kora live,
+koora live,
+كورة ستار,
+koora star,
+كورة جول,
+kora goal,
+كورة اون لاين,
+kora online,
+يلا كورة,
+yalla kora,
+goalarab,
+goal arab,
+tab3live,
+tab3 live,
+bein sport live,
+beIN sports بث مباشر,
+قنوات بي ان سبورت,
+bein sports hd,
+بث مباشر,
+live streaming,
+بث مباشر مباريات,
+مشاهدة مباريات اليوم,
+matches today,
+مشاهدة مباراة,
+watch live match,
+مشاهدة مباريات بدون تقطيع,
+live football,
+football live stream,
+soccer live,
+watch football online,
+free live streaming football,
+live tv arabic,
+arabic live tv,
+sports live hd,
+live sports streaming,
+hd live matches,
+مشاهدة القنوات الرياضية,
+sports channels live,
+الدوري الانجليزي بث مباشر,
+الدوري الاسباني بث مباشر,
+الدوري الايطالي بث مباشر,
+الدوري الفرنسي بث مباشر,
+الدوري الالماني بث مباشر,
+دوري ابطال اوروبا بث مباشر,
+دوري ابطال افريقيا بث مباشر,
+كاس العالم بث مباشر,
+كاس اسيا بث مباشر,
+مباريات برشلونة بث مباشر,
+مباريات ريال مدريد بث مباشر,
+مباريات ليفربول بث مباشر,
+مباريات مانشستر سيتي بث مباشر,
+مباريات الهلال بث مباشر,
+مباريات النصر بث مباشر,
+مباريات اليوم HD,
+مشاهدة مباريات مباشرة,
+مشاهدة المباريات اون لاين,
+مشاهدة القنوات المشفرة,
+live tv free,
+free sports streaming,
+online football streaming,
+live match today,
+stream football free,
+watch soccer live hd
+">
+
 <meta name="robots" content="index, follow">
+<meta name="author" content="BSR Live">
+<meta name="language" content="Arabic">
+<meta name="theme-color" content="#0b1220">
+
+<meta property="og:title" content="BSR Live - بث مباشر مباريات اليوم والقنوات الرياضية HD">
+<meta property="og:description" content="تابع مباريات اليوم والقنوات الرياضية بث مباشر بدون تقطيع عبر BSR Live.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ar_AR">
 
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
@@ -64,7 +145,7 @@ header{
   right:0;
   z-index:50;
   box-shadow:none;
-  border-bottom:1px solid var(--line);
+  border-bottom:none;
 }
 header h3{margin:0;font-size:18px;font-weight:800;letter-spacing:.5px}
 .header-btn{
@@ -254,6 +335,8 @@ video{
   height:100%;
   background:#000;
   object-fit:fill;
+  position:relative;
+  z-index:1;
 }
 video.fit-contain{object-fit:contain!important}
 video.fit-cover{object-fit:cover!important}
@@ -264,7 +347,7 @@ video.fit-fill{object-fit:fill!important}
   top:0;
   right:0;
   left:0;
-  z-index:80;
+  z-index:500;
   height:62px;
   padding:10px 12px;
   display:flex;
@@ -308,7 +391,7 @@ video.fit-fill{object-fit:fill!important}
   top:65px;
   right:10px;
   left:10px;
-  z-index:75;
+  z-index:500;
   display:flex;
   gap:8px;
   overflow-x:auto;
@@ -334,7 +417,7 @@ video.fit-fill{object-fit:fill!important}
   top:50%;
   left:50%;
   transform:translate(-50%,-50%);
-  z-index:70;
+  z-index:500;
   display:flex;
   align-items:center;
   gap:18px;
@@ -361,7 +444,7 @@ video.fit-fill{object-fit:fill!important}
   left:0;
   right:0;
   bottom:0;
-  z-index:80;
+  z-index:500;
   padding:12px;
   background:linear-gradient(to top, rgba(0,0,0,.82), rgba(0,0,0,0));
 }
@@ -395,7 +478,7 @@ video.fit-fill{object-fit:fill!important}
   transform:translate(-50%,-50%);
   border-radius:50%;
   display:none;
-  z-index:90;
+  z-index:600;
   animation:spin 1s linear infinite;
 }
 #loading{width:48px;height:48px;border:4px solid rgba(255,255,255,.22);border-top-color:#fff}
@@ -440,6 +523,38 @@ video.fit-fill{object-fit:fill!important}
   font-weight:800;
 }
 .toast.show{display:block}
+
+/* محاولة عرض المشغل بشكل أفقي حتى على الهاتف */
+@media screen and (orientation: portrait) and (max-width: 900px){
+  #playerRoot.show .player-wrapper{
+    width:100vh;
+    height:100vw;
+    transform:rotate(90deg) translateY(-100%);
+    transform-origin:top left;
+    position:absolute;
+    top:0;
+    left:0;
+  }
+}
+
+
+.player-top,
+.server-strip,
+.center-control,
+.player-bottom{
+  transition: opacity .25s ease, transform .25s ease;
+}
+.player-controls-hidden .player-top,
+.player-controls-hidden .server-strip,
+.player-controls-hidden .center-control,
+.player-controls-hidden .player-bottom{
+  opacity:0;
+  pointer-events:none;
+}
+.player-controls-hidden .player-top{transform:translateY(-8px)}
+.player-controls-hidden .player-bottom{transform:translateY(8px)}
+.player-controls-hidden .server-strip{transform:translateY(-8px)}
+
 </style>
 </head>
 
@@ -549,6 +664,27 @@ let currentIndex = 0;
 let lastMatchTitle = "";
 let fitIndex = 2;
 let rotated = false;
+let retryCount = 0;
+let controlsTimer = null;
+
+function showPlayerControls(){
+  playerRoot.classList.remove("player-controls-hidden");
+  clearTimeout(controlsTimer);
+  controlsTimer = setTimeout(()=>{
+    if(playerRoot.classList.contains("show")){
+      playerRoot.classList.add("player-controls-hidden");
+    }
+  }, 3000);
+}
+
+function hidePlayerControlsNow(){
+  clearTimeout(controlsTimer);
+  playerRoot.classList.add("player-controls-hidden");
+}
+
+const MAX_RETRY = 999;
+let suppressVideoError = false;
+let softRecovering = false;
 
 const fitModes = [
   { cls:"fit-contain", icon:"minimize-2", label:"ملاءمة" },
@@ -734,6 +870,8 @@ function buildProxyUrl(src){
   if(src.userAgent) params.set("ua", src.userAgent);
   if(src.referer) params.set("ref", src.referer);
   if(src.origin) params.set("origin", src.origin);
+  if(String(src.url || "").toLowerCase().includes("#hls")) params.set("type", "hls");
+  params.set("_", Date.now().toString());
   return WORKER_BASE + "?" + params.toString();
 }
 function destroyPlayer(){
@@ -753,20 +891,61 @@ function showError(t,m){
 }
 function hideError(){ errorOverlay.style.display="none"; }
 
+
+async function enterLandscapeMode(){
+  try{
+    if(playerRoot.requestFullscreen) await playerRoot.requestFullscreen();
+    else if(playerRoot.webkitRequestFullscreen) await playerRoot.webkitRequestFullscreen();
+  }catch(e){}
+
+  try{
+    if(screen.orientation && screen.orientation.lock){
+      await screen.orientation.lock("landscape");
+    }
+  }catch(e){}
+}
+
 function openPlayer(payload){
+  feather.replace();
   currentServers = payload.servers || [];
   currentIndex = 0;
   lastMatchTitle = payload.title || "BSR LIVE";
   playerTitle.textContent = lastMatchTitle;
   playerRoot.classList.add("show");
+  showPlayerControls();
+  enterLandscapeMode();
   buildServerButtons();
   playServer(0);
 }
 function closePlayer(){
   destroyPlayer();
+  clearTimeout(controlsTimer);
+  playerRoot.classList.remove("player-controls-hidden");
   playerRoot.classList.remove("show");
+  try{
+    if(screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+  }catch(e){}
+  try{
+    if(document.fullscreenElement) document.exitFullscreen();
+    else if(document.webkitFullscreenElement) document.webkitExitFullscreen();
+  }catch(e){}
 }
 document.getElementById("playerBackBtn").onclick = closePlayer;
+
+playerRoot.addEventListener("click", (e)=>{
+  const interactive = e.target.closest("button,.server-btn,#progress");
+  if(interactive) {
+    showPlayerControls();
+    return;
+  }
+  if(playerRoot.classList.contains("player-controls-hidden")) showPlayerControls();
+  else hidePlayerControlsNow();
+});
+
+playerRoot.addEventListener("mousemove", ()=>{
+  if(playerRoot.classList.contains("show")) showPlayerControls();
+});
+
 
 function buildServerButtons(){
   serverStrip.innerHTML = "";
@@ -774,19 +953,24 @@ function buildServerButtons(){
     const b = document.createElement("button");
     b.className = "server-btn" + (i===currentIndex ? " active" : "");
     b.textContent = s.label || `Server ${i+1}`;
-    b.onclick = () => playServer(i);
+    b.onclick = () => { showPlayerControls(); playServer(i); };
     serverStrip.appendChild(b);
   });
 }
-async function playServer(i){
+async function playServer(i, isRetry = false){
   const src = currentServers[i];
   if(!src || !src.url){
     showError("لا يوجد سيرفر", "لا يوجد رابط لهذه المباراة.");
     return;
   }
+
+  if(!isRetry) retryCount = 0;
+
   currentIndex = i;
   buildServerButtons();
+  suppressVideoError = true;
   destroyPlayer();
+  setTimeout(()=>{ suppressVideoError = false; }, 900);
   hideError();
   loading.style.display="block";
 
@@ -796,9 +980,28 @@ async function playServer(i){
   try{
     if(type === "dash"){
       shaka.polyfill.installAll();
+      if(!shaka.Player.isBrowserSupported()) throw new Error("المتصفح لا يدعم DASH");
+
       shakaPlayer = new shaka.Player(video);
+
+      shakaPlayer.configure({
+        streaming: {
+          bufferingGoal: 30,
+          rebufferingGoal: 2,
+          retryParameters: {
+            timeout: 15000,
+            maxAttempts: 4,
+            baseDelay: 1000,
+            backoffFactor: 2,
+            fuzzFactor: 0.5
+          }
+        }
+      });
+
+      shakaPlayer.addEventListener("error", () => toastMsg("DASH يحاول الاستمرار..."));
       const ck = parseClearKey(src.drmKey || "");
       if(ck) shakaPlayer.configure({drm:{clearKeys:{[ck.kid]:ck.key}}});
+
       await shakaPlayer.load(finalUrl);
       await video.play().catch(()=>{});
     } else if(type === "hls"){
@@ -807,13 +1010,57 @@ async function playServer(i){
         video.load();
         await video.play().catch(()=>{});
       } else if(window.Hls && Hls.isSupported()){
-        hls = new Hls({enableWorker:true, lowLatencyMode:true});
+        hls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: false,
+          liveSyncDurationCount: 5,
+          liveMaxLatencyDurationCount: 15,
+          maxBufferLength: 60,
+          maxMaxBufferLength: 120,
+          backBufferLength: 20,
+          fragLoadingTimeOut: 20000,
+          manifestLoadingTimeOut: 20000,
+          levelLoadingTimeOut: 20000,
+          fragLoadingMaxRetry: 6,
+          manifestLoadingMaxRetry: 6,
+          levelLoadingMaxRetry: 6,
+          fragLoadingRetryDelay: 1200,
+          manifestLoadingRetryDelay: 1200,
+          levelLoadingRetryDelay: 1200
+        });
+
         hls.loadSource(finalUrl);
         hls.attachMedia(video);
-        await new Promise((resolve,reject)=>{
-          hls.on(Hls.Events.MANIFEST_PARSED, resolve);
-          hls.on(Hls.Events.ERROR, (ev,data)=>{ if(data.fatal) reject(new Error("فشل تشغيل HLS")); });
+
+        hls.on(Hls.Events.ERROR, function(event, data){
+          if(!data || !data.fatal) return;
+
+          if(data.type === Hls.ErrorTypes.NETWORK_ERROR){
+            try {
+              hls.startLoad();
+              toastMsg("جاري متابعة البث...");
+            } catch(e) {}
+            return;
+          }
+
+          if(data.type === Hls.ErrorTypes.MEDIA_ERROR){
+            try {
+              hls.recoverMediaError();
+              toastMsg("جاري تصحيح البث...");
+            } catch(e) {}
+            return;
+          }
+
+          // إذا الخطأ قوي، لا نوقف المشغل؛ نعيد الاتصال بنفس السيرفر
+          autoRetry("HLS fatal");
         });
+
+        await new Promise((resolve,reject)=>{
+          const timer = setTimeout(()=>reject(new Error("انتهت مهلة تحميل القناة")), 22000);
+          hls.on(Hls.Events.MANIFEST_PARSED, ()=>{ clearTimeout(timer); resolve(); });
+          hls.on(Hls.Events.ERROR, (ev,data)=>{ if(data.fatal && data.details === "manifestLoadError"){ clearTimeout(timer); reject(new Error("فشل تحميل ملف m3u8")); } });
+        });
+
         await video.play().catch(()=>{});
       } else {
         video.src = finalUrl;
@@ -825,13 +1072,22 @@ async function playServer(i){
       video.load();
       await video.play().catch(()=>{});
     }
+
     loading.style.display="none";
     setPlayIcon();
     toastMsg("تم تشغيل السيرفر");
   }catch(e){
-    showError("فشل التشغيل", e.message || String(e));
+    loading.style.display="none";
+    autoRetry(e.message || "فشل التشغيل");
   }
 }
+
+function autoRetry(reason){
+  retryCount++;
+  toastMsg("جاري إعادة الاتصال بالبث...");
+  setTimeout(()=>playServer(currentIndex, true), Math.min(4000, 900 + (retryCount % 4) * 700));
+}
+
 function parseClearKey(ckString){
   if(!ckString) return null;
   const parts = ckString.split(":");
@@ -861,7 +1117,43 @@ video.addEventListener("timeupdate", updateProgress);
 video.addEventListener("loadedmetadata", updateProgress);
 video.addEventListener("waiting", ()=>buffer.style.display="block");
 video.addEventListener("playing", ()=>buffer.style.display="none");
-video.addEventListener("error", ()=>showError("خطأ في الفيديو", "تعذر تشغيل الفيديو."));
+video.addEventListener("stalled", ()=>{
+  if(hls){
+    try { hls.startLoad(); } catch(e){}
+  }
+});
+video.addEventListener("ended", ()=>{
+  if(hls){
+    try { hls.startLoad(); video.play().catch(()=>{}); } catch(e){}
+  }
+});
+
+video.addEventListener("error", ()=>{
+  if(suppressVideoError) return;
+
+  // لا تعرض شاشة توقف بسرعة، حاول ترجع نفس البث أولاً
+  if(hls){
+    try {
+      hls.startLoad(-1);
+      video.play().catch(()=>{});
+      toastMsg("جاري متابعة البث...");
+      return;
+    } catch(e){}
+  }
+
+  // إذا كان تشغيل ملف مباشر أو المتصفح هو الذي يشغل HLS، أعد تحميل نفس السيرفر بهدوء
+  if(!softRecovering){
+    softRecovering = true;
+    toastMsg("جاري إعادة الاتصال بالبث...");
+    setTimeout(()=>{
+      softRecovering = false;
+      playServer(currentIndex, true);
+    }, 1200);
+    return;
+  }
+
+  toastMsg("البث يحاول الاستمرار...");
+});
 
 progress.onclick = e => {
   const dur = video.duration;
@@ -876,6 +1168,7 @@ function setPlayIcon(){
   feather.replace();
 }
 document.getElementById("playPauseBtn").onclick = async () => {
+  showPlayerControls();
   if(video.paused) await video.play().catch(()=>{});
   else video.pause();
   setPlayIcon();
@@ -884,18 +1177,22 @@ video.addEventListener("play", setPlayIcon);
 video.addEventListener("pause", setPlayIcon);
 
 document.getElementById("rewindBtn").onclick = () => {
+  showPlayerControls();
   if(video.duration && isFinite(video.duration)) video.currentTime = Math.max(0, video.currentTime - 5);
 };
 document.getElementById("forwardBtn").onclick = () => {
+  showPlayerControls();
   if(video.duration && isFinite(video.duration)) video.currentTime = Math.min(video.duration, video.currentTime + 15);
 };
 document.getElementById("muteBtn").onclick = () => {
+  showPlayerControls();
   video.muted = !video.muted;
   document.getElementById("muteBtn").innerHTML = `<i data-feather="${video.muted ? "volume-x" : "volume-2"}"></i>`;
   feather.replace();
 };
 
 document.getElementById("fitBtn").onclick = () => {
+  showPlayerControls();
   fitIndex = (fitIndex + 1) % fitModes.length;
   video.classList.remove("fit-contain","fit-cover","fit-fill");
   video.classList.add(fitModes[fitIndex].cls);
@@ -905,13 +1202,14 @@ document.getElementById("fitBtn").onclick = () => {
 };
 
 document.getElementById("rotateBtn").onclick = () => {
+  showPlayerControls();
   rotated = !rotated;
   video.style.transform = rotated ? "rotate(90deg) scale(1.02)" : "";
   video.style.transformOrigin = "center center";
   toastMsg(rotated ? "تم تفعيل التدوير" : "تم إيقاف التدوير");
 };
 
-document.getElementById("retryBtn").onclick = () => playServer(currentIndex);
+document.getElementById("retryBtn").onclick = () => { retryCount = 0; playServer(currentIndex); };
 
 </script>
 
