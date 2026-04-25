@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Exo Style Player</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>BSR Player</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.13/shaka-player.compiled.js"></script>
 
 <style>
 *{box-sizing:border-box;user-select:none}
@@ -17,134 +18,86 @@ video{width:100%;height:100%;background:#000;object-fit:fill}
 video.fit-contain{object-fit:contain!important}
 video.fit-cover{object-fit:cover!important}
 video.fit-fill{object-fit:fill!important}
-
-#loading-spinner,#buffer-spinner{
-position:absolute;z-index:50;top:50%;left:50%;transform:translate(-50%,-50%);
-border-radius:50%;border:5px solid rgba(255,255,255,.25);border-top-color:#fff;
-animation:spin 1s linear infinite;display:none
-}
-#loading-spinner{width:50px;height:50px}
-#buffer-spinner{width:85px;height:85px}
+#loading,#buffer{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:5px solid rgba(255,255,255,.25);border-top-color:#fff;animation:spin 1s linear infinite;display:none;z-index:60}
+#loading{width:52px;height:52px}
+#buffer{width:85px;height:85px}
 @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
-
-#error-overlay{
-position:absolute;inset:0;z-index:999;background:rgba(0,0,0,.92);color:#fff;
-display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px
-}
-.retry-btn{border:0;background:#fff;color:#000;padding:10px 16px;border-radius:999px;font-weight:700}
-
-.top-bar{
-position:absolute;top:0;left:0;right:0;z-index:70;display:flex;align-items:center;
-padding:12px 14px;background:linear-gradient(to bottom,rgba(0,0,0,.75),transparent);
-opacity:0;transition:.25s;pointer-events:auto
-}
-.top-bar.visible{opacity:1}
-.top-left{display:flex;align-items:center;gap:10px}
-.top-btn,.icon-btn{
-border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.1);
-color:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer
-}
-.top-btn{width:42px;height:42px}
-.icon-btn{width:40px;height:40px}
-.stream-title{color:#fff;font-size:15px;font-weight:700;max-width:70vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-.center-transport{
-position:absolute;z-index:60;left:50%;top:50%;transform:translate(-50%,-50%);
-display:flex;align-items:center;gap:20px;opacity:0;transition:.2s;pointer-events:auto
-}
-.center-transport.visible{opacity:1}
-.circle-btn{
-border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.12);
-color:#fff;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer
-}
-.big{width:74px;height:74px}
-.seek-btn{width:58px;height:58px;position:relative}
-.seek-btn .num{position:absolute;font-size:13px;font-weight:800}
-
-.bottom-bar{
-position:absolute;z-index:70;left:0;right:0;bottom:0;padding:12px 14px 14px;
-background:linear-gradient(to top,rgba(0,0,0,.8),transparent);
-opacity:0;transition:.25s;pointer-events:auto
-}
-.bottom-bar.visible{opacity:1}
-.progress-wrapper{height:5px;background:rgba(255,255,255,.25);border-radius:999px;position:relative;overflow:hidden;margin-bottom:10px}
-.progress-played{position:absolute;left:0;top:0;bottom:0;width:0;background:#fff}
-.progress-thumb{position:absolute;top:50%;left:0;transform:translate(-50%,-50%);width:12px;height:12px;background:#fff;border-radius:50%}
-
-.controls-row{display:flex;align-items:center;gap:10px}
-.icons-row{display:flex;gap:10px;direction:ltr;flex:1}
-.time-text{color:#fff;font-size:14px;direction:ltr;min-width:105px;text-align:left}
-.live-task{display:none;color:#fff;font-weight:800;align-items:center;gap:6px}
-.live-task .dot{width:8px;height:8px;background:red;border-radius:50%;box-shadow:0 0 10px red}
-
-.quality-menu{
-position:absolute;bottom:64px;left:12px;z-index:90;min-width:170px;background:rgba(0,0,0,.85);
-border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:6px;display:none
-}
-.quality-menu.visible{display:block}
-.quality-item{
-width:100%;border:0;background:transparent;color:#fff;padding:10px;border-radius:12px;
-font-family:Tajawal;text-align:right;cursor:pointer
-}
-.quality-item.active,.quality-item:hover{background:rgba(255,255,255,.15)}
-#liveLabel{
-position:absolute;bottom:110px;left:50%;transform:translateX(-50%);
-color:#fff;background:rgba(0,0,0,.6);padding:7px 12px;border-radius:999px;display:none;z-index:90
-}
+#error{position:absolute;inset:0;background:rgba(0,0,0,.94);color:#fff;display:none;z-index:999;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
+#error button{border:0;border-radius:999px;background:#fff;color:#000;padding:11px 18px;font-weight:800;font-family:Tajawal}
+.top{position:absolute;top:0;left:0;right:0;padding:12px 14px;background:linear-gradient(to bottom,rgba(0,0,0,.8),transparent);display:flex;align-items:center;gap:10px;opacity:0;transition:.25s;z-index:80}
+.top.visible,.bottom.visible,.center.visible{opacity:1}
+.btn{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.11);color:#fff;border-radius:14px;width:42px;height:42px;display:flex;align-items:center;justify-content:center}
+.title{color:#fff;font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70vw}
+.center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;gap:20px;align-items:center;opacity:0;transition:.25s;z-index:80}
+.circle{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;display:flex;align-items:center;justify-content:center}
+.big{width:76px;height:76px}
+.seek{width:58px;height:58px;position:relative}
+.seek .num{position:absolute;font-size:13px;font-weight:900}
+.bottom{position:absolute;left:0;right:0;bottom:0;padding:12px 14px 15px;background:linear-gradient(to top,rgba(0,0,0,.82),transparent);opacity:0;transition:.25s;z-index:80}
+.progress{height:5px;background:rgba(255,255,255,.25);border-radius:999px;position:relative;margin-bottom:12px;overflow:hidden}
+.played{position:absolute;left:0;top:0;bottom:0;width:0;background:#fff}
+.thumb{position:absolute;top:50%;left:0;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:#fff}
+.row{display:flex;align-items:center;gap:10px}
+.icons{display:flex;gap:10px;direction:ltr;flex:1}
+.icon{width:40px;height:40px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#fff;border-radius:13px;display:flex;align-items:center;justify-content:center}
+.time{color:#fff;font-size:14px;direction:ltr;min-width:110px;text-align:left}
+.live{display:none;color:#fff;font-weight:900;align-items:center;gap:7px}
+.live span{width:8px;height:8px;background:red;border-radius:50%;box-shadow:0 0 10px red}
+.menu{position:absolute;bottom:68px;left:12px;z-index:100;min-width:180px;background:rgba(0,0,0,.88);border:1px solid rgba(255,255,255,.16);border-radius:15px;padding:7px;display:none}
+.menu.visible{display:block}
+.menu button{width:100%;border:0;background:transparent;color:#fff;padding:11px;border-radius:12px;text-align:right;font-family:Tajawal}
+.menu button.active,.menu button:hover{background:rgba(255,255,255,.15)}
+#toast{position:absolute;bottom:112px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.65);color:#fff;padding:7px 13px;border-radius:999px;display:none;z-index:100}
 </style>
 </head>
 
 <body>
 <div id="player-root">
-<div class="player-wrapper" id="playerWrapper">
+<div class="player-wrapper" id="wrap">
 
 <video id="video" playsinline autoplay></video>
 
-<div class="top-bar" id="topBar">
-  <div class="top-left">
-    <button class="top-btn" id="backBtn"><i data-feather="arrow-right"></i></button>
-    <div class="stream-title" id="streamTitle">A Live</div>
-  </div>
+<div class="top" id="top">
+  <button class="btn" id="back"><i data-feather="arrow-right"></i></button>
+  <div class="title" id="title">BSR Player</div>
 </div>
 
-<div id="loading-spinner"></div>
-<div id="buffer-spinner"></div>
+<div id="loading"></div>
+<div id="buffer"></div>
 
-<div id="error-overlay">
+<div id="error">
   <i data-feather="alert-triangle"></i>
-  <h3 id="error-title">خطأ في المشغل</h3>
-  <p id="error-message">تعذر تشغيل الفيديو.</p>
-  <button class="retry-btn" id="retryBtn">إعادة التحميل</button>
+  <h3 id="errTitle">خطأ في المشغل</h3>
+  <p id="errMsg">تعذر تشغيل الرابط</p>
+  <button id="retry">إعادة التحميل</button>
 </div>
 
-<div class="center-transport" id="centerTransport">
-  <div class="circle-btn seek-btn" id="rewind5Btn"><i data-feather="rotate-ccw"></i><div class="num">5</div></div>
-  <div class="circle-btn big" id="centerPlayPauseBtn"><i data-feather="pause"></i></div>
-  <div class="circle-btn seek-btn" id="forward15Btn"><i data-feather="rotate-cw"></i><div class="num">15</div></div>
+<div class="center" id="center">
+  <button class="circle seek" id="rew"><i data-feather="rotate-ccw"></i><div class="num">5</div></button>
+  <button class="circle big" id="play"><i data-feather="pause"></i></button>
+  <button class="circle seek" id="fwd"><i data-feather="rotate-cw"></i><div class="num">15</div></button>
 </div>
 
-<div class="bottom-bar" id="bottomBar">
-  <div class="progress-wrapper" id="progressWrapper">
-    <div class="progress-played" id="progressPlayed"></div>
-    <div class="progress-thumb" id="progressThumb"></div>
+<div class="bottom" id="bottom">
+  <div class="progress" id="progress">
+    <div class="played" id="played"></div>
+    <div class="thumb" id="thumb"></div>
   </div>
 
-  <div class="controls-row">
-    <div class="icons-row">
-      <button class="icon-btn" id="muteBtn"><i data-feather="volume-x"></i></button>
-      <button class="icon-btn" id="fitBtn"><i data-feather="maximize-2"></i></button>
-      <button class="icon-btn" id="qualityBtn"><i data-feather="settings"></i></button>
-      <button class="icon-btn" id="castBtn"><i data-feather="cast"></i></button>
-      <button class="icon-btn" id="rotateBtn"><i data-feather="rotate-cw"></i></button>
+  <div class="row">
+    <div class="icons">
+      <button class="icon" id="mute"><i data-feather="volume-x"></i></button>
+      <button class="icon" id="fit"><i data-feather="maximize-2"></i></button>
+      <button class="icon" id="quality"><i data-feather="settings"></i></button>
+      <button class="icon" id="rotate"><i data-feather="rotate-cw"></i></button>
     </div>
-
-    <div class="live-task" id="liveTask"><span class="dot"></span>A LIVE</div>
-    <div class="time-text" id="timeLabel">00:00 • 00:00</div>
+    <div class="live" id="live"><span></span>A LIVE</div>
+    <div class="time" id="time">00:00 • 00:00</div>
   </div>
 </div>
 
-<div class="quality-menu" id="qualityMenu"></div>
-<div id="liveLabel"></div>
+<div class="menu" id="qMenu"></div>
+<div id="toast"></div>
 
 </div>
 </div>
@@ -154,349 +107,442 @@ document.addEventListener("DOMContentLoaded", () => {
   feather.replace();
 
   const video = document.getElementById("video");
-  const loadingSpinner = document.getElementById("loading-spinner");
-  const bufferSpinner = document.getElementById("buffer-spinner");
-  const errorOverlay = document.getElementById("error-overlay");
-  const errorTitle = document.getElementById("error-title");
-  const errorMessage = document.getElementById("error-message");
-  const retryBtn = document.getElementById("retryBtn");
-  const topBar = document.getElementById("topBar");
-  const bottomBar = document.getElementById("bottomBar");
-  const centerTransport = document.getElementById("centerTransport");
-  const streamTitleEl = document.getElementById("streamTitle");
-  const backBtn = document.getElementById("backBtn");
-  const centerPlayPauseBtn = document.getElementById("centerPlayPauseBtn");
-  const rewind5Btn = document.getElementById("rewind5Btn");
-  const forward15Btn = document.getElementById("forward15Btn");
-  const muteBtn = document.getElementById("muteBtn");
-  const fitBtn = document.getElementById("fitBtn");
-  const qualityBtn = document.getElementById("qualityBtn");
-  const qualityMenu = document.getElementById("qualityMenu");
-  const rotateBtn = document.getElementById("rotateBtn");
-  const castBtn = document.getElementById("castBtn");
-  const progressWrapper = document.getElementById("progressWrapper");
-  const progressPlayed = document.getElementById("progressPlayed");
-  const progressThumb = document.getElementById("progressThumb");
-  const timeLabel = document.getElementById("timeLabel");
-  const liveTask = document.getElementById("liveTask");
-  const liveLabel = document.getElementById("liveLabel");
+  const topBar = document.getElementById("top");
+  const bottom = document.getElementById("bottom");
+  const center = document.getElementById("center");
+  const loading = document.getElementById("loading");
+  const buffer = document.getElementById("buffer");
+  const error = document.getElementById("error");
+  const errTitle = document.getElementById("errTitle");
+  const errMsg = document.getElementById("errMsg");
+  const titleEl = document.getElementById("title");
+  const playBtn = document.getElementById("play");
+  const muteBtn = document.getElementById("mute");
+  const fitBtn = document.getElementById("fit");
+  const rotateBtn = document.getElementById("rotate");
+  const qualityBtn = document.getElementById("quality");
+  const qMenu = document.getElementById("qMenu");
+  const progress = document.getElementById("progress");
+  const played = document.getElementById("played");
+  const thumb = document.getElementById("thumb");
+  const time = document.getElementById("time");
+  const live = document.getElementById("live");
+  const toast = document.getElementById("toast");
 
-  const WORKER_PROXY = "https://ali.albesriali8.workers.dev/";
+  const WORKER = "https://ali.albesriali8.workers.dev/";
 
   let hls = null;
-  let hideTimeout = null;
-  let rotated = false;
+  let shakaPlayer = null;
+  let hideTimer = null;
   let fitIndex = 0;
+  let rotated = false;
+  let currentUrl = "";
 
-  function needsProxy(u) {
-    const x = (u || "").toLowerCase();
-    return (
-      x.includes("ostora.pages.dev") ||
-      x.includes(".png#hls") ||
-      x.includes(".png") ||
-      x.includes(".json?token=") ||
-      x.includes(".m3u8")
-    );
+  function getParams(){
+    const p = new URLSearchParams(location.search);
+    const get = k => {
+      let v = p.get(k) || "";
+      try { v = decodeURIComponent(v); } catch(e){}
+      return v;
+    };
+    return {
+      url: get("url"),
+      title: get("title") || "BSR Player",
+      ck: get("ck"),
+      ref: get("ref"),
+      origin: get("origin"),
+      ua: get("ua") || "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
+    };
   }
 
-  function proxyUrl(u) {
-    if (!u) return u;
-    if (u.startsWith(WORKER_PROXY)) return u;
-    if (!needsProxy(u)) return u;
+  function proxyUrl(u, ref, origin, ua){
+    if(!u) return u;
+    if(u.startsWith(WORKER)) return u;
+
+    const x = u.toLowerCase();
+    const mustProxy =
+      x.startsWith("http://") ||
+      x.includes("ostora.pages.dev") ||
+      x.includes(".png") ||
+      x.includes(".json") ||
+      x.includes(".m3u8") ||
+      x.includes(".mpd");
+
+    if(!mustProxy) return u;
 
     const p = new URLSearchParams();
-    p.set("url", u.replace("#hls", ""));
-    p.set("ref", "https://ostora.pages.dev/");
-    p.set("origin", "https://ostora.pages.dev");
-    p.set("ua", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36");
+    p.set("url", u.replace("#hls",""));
+    p.set("ua", ua);
 
-    return WORKER_PROXY + "?" + p.toString();
+    try{
+      const site = new URL(u.replace("#hls",""));
+      p.set("ref", ref || site.origin + "/");
+      p.set("origin", origin || site.origin);
+    }catch(e){
+      if(ref) p.set("ref", ref);
+      if(origin) p.set("origin", origin);
+    }
+
+    return WORKER + "?" + p.toString();
   }
 
-  function getParams() {
-    const p = new URLSearchParams(window.location.search);
-    let url = p.get("url") || "";
-    let title = p.get("title") || "A Live";
-
-    try { url = decodeURIComponent(url); } catch(e) {}
-    try { title = decodeURIComponent(title); } catch(e) {}
-
-    url = proxyUrl(url);
-
-    return { url, title };
+  function isMpd(u){
+    return (u || "").toLowerCase().includes(".mpd");
   }
 
-  function showError(title, msg) {
-    loadingSpinner.style.display = "none";
-    bufferSpinner.style.display = "none";
-    errorTitle.textContent = title;
-    errorMessage.textContent = msg;
-    errorOverlay.style.display = "flex";
-    feather.replace();
-  }
-
-  function hideError() {
-    errorOverlay.style.display = "none";
-  }
-
-  function flashLabel(text) {
-    liveLabel.textContent = text;
-    liveLabel.style.display = "block";
-    setTimeout(() => liveLabel.style.display = "none", 1200);
-  }
-
-  function showControls() {
+  function showControls(){
     topBar.classList.add("visible");
-    bottomBar.classList.add("visible");
-    centerTransport.classList.add("visible");
-
-    clearTimeout(hideTimeout);
-    hideTimeout = setTimeout(() => {
+    bottom.classList.add("visible");
+    center.classList.add("visible");
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
       topBar.classList.remove("visible");
-      bottomBar.classList.remove("visible");
-      centerTransport.classList.remove("visible");
-      qualityMenu.classList.remove("visible");
+      bottom.classList.remove("visible");
+      center.classList.remove("visible");
+      qMenu.classList.remove("visible");
     }, 2800);
   }
 
-  function setPlayIcon() {
-    centerPlayPauseBtn.innerHTML = `<i data-feather="${video.paused ? "play" : "pause"}"></i>`;
+  function showError(t,m){
+    loading.style.display = "none";
+    buffer.style.display = "none";
+    errTitle.textContent = t;
+    errMsg.textContent = m;
+    error.style.display = "flex";
     feather.replace();
   }
 
-  function updateMuteIcon() {
+  function hideError(){
+    error.style.display = "none";
+  }
+
+  function flash(t){
+    toast.textContent = t;
+    toast.style.display = "block";
+    setTimeout(()=>toast.style.display="none",1200);
+  }
+
+  function setPlayIcon(){
+    playBtn.innerHTML = `<i data-feather="${video.paused ? "play" : "pause"}"></i>`;
+    feather.replace();
+  }
+
+  function setMuteIcon(){
     muteBtn.innerHTML = `<i data-feather="${video.muted ? "volume-x" : "volume-2"}"></i>`;
     feather.replace();
   }
 
-  function fmt(sec) {
-    if (!isFinite(sec) || sec < 0) return "00:00";
-    const s = Math.floor(sec % 60).toString().padStart(2, "0");
-    const m = Math.floor(sec / 60).toString().padStart(2, "0");
-    const h = Math.floor(sec / 3600);
-    return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
+  function fmt(s){
+    if(!isFinite(s) || s < 0) return "00:00";
+    const sec = Math.floor(s % 60).toString().padStart(2,"0");
+    const min = Math.floor((s / 60) % 60).toString().padStart(2,"0");
+    const hr = Math.floor(s / 3600);
+    return hr > 0 ? `${hr}:${min}:${sec}` : `${min}:${sec}`;
   }
 
-  function updateProgress() {
-    const cur = video.currentTime || 0;
-    const dur = video.duration || 0;
+  function updateProgress(){
+    const d = video.duration || 0;
+    const c = video.currentTime || 0;
 
-    if (dur > 0 && isFinite(dur)) {
-      const ratio = (cur / dur) * 100;
-      progressPlayed.style.width = ratio + "%";
-      progressThumb.style.left = ratio + "%";
-      timeLabel.style.display = "block";
-      liveTask.style.display = "none";
-      timeLabel.textContent = `${fmt(cur)} • ${fmt(dur)}`;
+    if(d > 0 && isFinite(d)){
+      const r = (c / d) * 100;
+      played.style.width = r + "%";
+      thumb.style.left = r + "%";
+      time.style.display = "block";
+      live.style.display = "none";
+      time.textContent = `${fmt(c)} • ${fmt(d)}`;
     } else {
-      progressPlayed.style.width = "100%";
-      progressThumb.style.left = "100%";
-      timeLabel.style.display = "none";
-      liveTask.style.display = "flex";
+      played.style.width = "100%";
+      thumb.style.left = "100%";
+      time.style.display = "none";
+      live.style.display = "flex";
     }
   }
 
-  function buildQualityMenu() {
-    if (!hls) return;
+  function parseClearKey(ck){
+    if(!ck || !ck.includes(":")) return null;
+    const [kid,key] = ck.split(":");
+    const k1 = kid.trim().replace(/-/g,"").toLowerCase();
+    const k2 = key.trim().replace(/-/g,"").toLowerCase();
+    if(!/^[0-9a-f]+$/.test(k1) || !/^[0-9a-f]+$/.test(k2)) return null;
+    return {kid:k1,key:k2};
+  }
 
-    const levels = hls.levels || [];
-    let html = `<button class="quality-item active" data-level="-1">تلقائي Auto</button>`;
+  async function destroyPlayers(){
+    if(hls){ hls.destroy(); hls = null; }
+    if(shakaPlayer){ await shakaPlayer.destroy().catch(()=>{}); shakaPlayer = null; }
+    video.removeAttribute("src");
+    video.load();
+  }
 
-    levels.forEach((level, i) => {
-      const label = level.height ? `${level.height}p` : `Quality ${i+1}`;
-      html += `<button class="quality-item" data-level="${i}">${label}</button>`;
+  async function playStream(){
+    const params = getParams();
+    if(!params.url){
+      showError("لا يوجد رابط", "افتح المشغل هكذا: player.html?url=رابط_القناة");
+      return;
+    }
+
+    titleEl.textContent = params.title;
+    hideError();
+    loading.style.display = "block";
+    buffer.style.display = "none";
+
+    const finalUrl = proxyUrl(params.url, params.ref, params.origin, params.ua);
+    currentUrl = finalUrl;
+
+    try{
+      await destroyPlayers();
+
+      if(isMpd(params.url)){
+        shaka.polyfill.installAll();
+
+        if(!shaka.Player.isBrowserSupported()){
+          showError("غير مدعوم", "المتصفح لا يدعم تشغيل DASH/MPD");
+          return;
+        }
+
+        shakaPlayer = new shaka.Player(video);
+
+        shakaPlayer.addEventListener("error", e => {
+          const msg = e.detail?.message || JSON.stringify(e.detail) || "خطأ غير معروف";
+          showError("خطأ MPD", msg);
+        });
+
+        const net = shakaPlayer.getNetworkingEngine();
+        if(net){
+          net.registerRequestFilter((type, request) => {
+            if(params.ua) request.headers["User-Agent"] = params.ua;
+            if(params.ref) request.headers["Referer"] = params.ref;
+            if(params.origin) request.headers["Origin"] = params.origin;
+          });
+        }
+
+        const ck = parseClearKey(params.ck);
+        if(ck){
+          shakaPlayer.configure({
+            drm: {
+              clearKeys: {
+                [ck.kid]: ck.key
+              }
+            }
+          });
+        }
+
+        shakaPlayer.addEventListener("buffering", e => {
+          buffer.style.display = e.buffering ? "block" : "none";
+        });
+
+        await shakaPlayer.load(finalUrl);
+
+        loading.style.display = "none";
+        await video.play().catch(()=>{});
+        setPlayIcon();
+        setMuteIcon();
+        buildShakaQuality();
+        showControls();
+
+      } else {
+        if(Hls.isSupported()){
+          hls = new Hls({
+            enableWorker:true,
+            lowLatencyMode:false,
+            maxBufferLength:30,
+            backBufferLength:90,
+            liveSyncDuration:4
+          });
+
+          hls.loadSource(finalUrl);
+          hls.attachMedia(video);
+
+          hls.on(Hls.Events.MANIFEST_PARSED, async () => {
+            loading.style.display = "none";
+            buildHlsQuality();
+            await video.play().catch(()=>{});
+            setPlayIcon();
+            setMuteIcon();
+            showControls();
+          });
+
+          hls.on(Hls.Events.ERROR, (event, data) => {
+            console.log("HLS ERROR", data);
+            if(data.fatal){
+              if(data.type === Hls.ErrorTypes.NETWORK_ERROR){
+                hls.startLoad();
+                flash("إعادة الاتصال");
+              } else if(data.type === Hls.ErrorTypes.MEDIA_ERROR){
+                hls.recoverMediaError();
+                flash("إصلاح الفيديو");
+              } else {
+                showError("خطأ HLS", data.details || "تعذر تشغيل الرابط");
+              }
+            }
+          });
+
+        } else if(video.canPlayType("application/vnd.apple.mpegurl")){
+          video.src = finalUrl;
+          video.addEventListener("loadedmetadata", async () => {
+            loading.style.display = "none";
+            await video.play().catch(()=>{});
+            setPlayIcon();
+            showControls();
+          }, {once:true});
+        } else {
+          video.src = finalUrl;
+          loading.style.display = "none";
+          await video.play().catch(()=>{});
+        }
+      }
+
+    } catch(e){
+      showError("فشل التشغيل", e.message || String(e));
+    }
+  }
+
+  function buildHlsQuality(){
+    if(!hls){ qMenu.innerHTML=""; return; }
+    let html = `<button class="active" data-level="-1">تلقائي Auto</button>`;
+    (hls.levels || []).forEach((l,i)=>{
+      html += `<button data-level="${i}">${l.height ? l.height+"p" : "Quality "+(i+1)}</button>`;
     });
-
-    qualityMenu.innerHTML = html;
-
-    qualityMenu.querySelectorAll(".quality-item").forEach(btn => {
-      btn.onclick = (e) => {
+    qMenu.innerHTML = html;
+    qMenu.querySelectorAll("button").forEach(b=>{
+      b.onclick = e => {
         e.stopPropagation();
-
-        const level = parseInt(btn.dataset.level, 10);
-        hls.currentLevel = level;
-
-        qualityMenu.querySelectorAll(".quality-item").forEach(x => x.classList.remove("active"));
-        btn.classList.add("active");
-
-        flashLabel(level === -1 ? "الجودة: تلقائي" : "الجودة: " + btn.textContent);
-        qualityMenu.classList.remove("visible");
+        hls.currentLevel = parseInt(b.dataset.level,10);
+        qMenu.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+        b.classList.add("active");
+        flash("الجودة: " + b.textContent);
+        qMenu.classList.remove("visible");
         showControls();
       };
     });
   }
 
-  async function playVideo() {
-    const { url, title } = getParams();
+  function buildShakaQuality(){
+    if(!shakaPlayer){ qMenu.innerHTML=""; return; }
 
-    if (!url) {
-      showError("لا يوجد رابط", "شغل المشغل هكذا: player.html?url=رابط_القناة");
-      return;
-    }
+    const tracks = shakaPlayer.getVariantTracks()
+      .filter(t=>t.height)
+      .sort((a,b)=>(b.height||0)-(a.height||0));
 
-    streamTitleEl.textContent = title;
-    hideError();
-    loadingSpinner.style.display = "block";
-
-    try {
-      if (hls) {
-        hls.destroy();
-        hls = null;
+    const seen = new Set();
+    const unique = [];
+    tracks.forEach(t=>{
+      if(!seen.has(t.height)){
+        seen.add(t.height);
+        unique.push(t);
       }
+    });
 
-      video.removeAttribute("src");
-      video.load();
+    let html = `<button class="active" data-id="auto">تلقائي Auto</button>`;
+    unique.forEach(t=>{
+      html += `<button data-id="${t.id}">${t.height}p</button>`;
+    });
 
-      if (Hls.isSupported()) {
-        hls = new Hls({
-          enableWorker: true,
-          lowLatencyMode: false,
-          maxBufferLength: 30,
-          backBufferLength: 90,
-          liveSyncDuration: 4
-        });
+    qMenu.innerHTML = html;
 
-        hls.loadSource(url);
-        hls.attachMedia(video);
+    qMenu.querySelectorAll("button").forEach(b=>{
+      b.onclick = e => {
+        e.stopPropagation();
 
-        hls.on(Hls.Events.MANIFEST_PARSED, async () => {
-          loadingSpinner.style.display = "none";
-          buildQualityMenu();
-          await video.play().catch(()=>{});
-          setPlayIcon();
-          updateMuteIcon();
-          showControls();
-        });
+        if(b.dataset.id === "auto"){
+          shakaPlayer.configure({abr:{enabled:true}});
+        } else {
+          shakaPlayer.configure({abr:{enabled:false}});
+          const tr = tracks.find(x=>String(x.id) === b.dataset.id);
+          if(tr) shakaPlayer.selectVariantTrack(tr, true);
+        }
 
-        hls.on(Hls.Events.BUFFERING, () => {
-          bufferSpinner.style.display = "block";
-        });
-
-        hls.on(Hls.Events.ERROR, (event, data) => {
-          console.log("HLS ERROR:", data);
-
-          if (data.fatal) {
-            loadingSpinner.style.display = "none";
-            bufferSpinner.style.display = "none";
-
-            if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-              hls.startLoad();
-              flashLabel("إعادة الاتصال بالبث");
-            } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
-              hls.recoverMediaError();
-              flashLabel("إصلاح خطأ الفيديو");
-            } else {
-              showError("خطأ في البث", data.details || "تعذر تشغيل الرابط");
-            }
-          }
-        });
-
-      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = url;
-        video.addEventListener("loadedmetadata", async () => {
-          loadingSpinner.style.display = "none";
-          await video.play().catch(()=>{});
-          setPlayIcon();
-          showControls();
-        }, { once:true });
-
-      } else {
-        showError("غير مدعوم", "المتصفح لا يدعم HLS");
-      }
-
-    } catch (e) {
-      showError("فشل التحميل", e.message || String(e));
-    }
+        qMenu.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+        b.classList.add("active");
+        flash("الجودة: " + b.textContent);
+        qMenu.classList.remove("visible");
+        showControls();
+      };
+    });
   }
 
-  centerPlayPauseBtn.onclick = async (e) => {
+  playBtn.onclick = async e => {
     e.stopPropagation();
-    if (video.paused) await video.play().catch(()=>{});
+    if(video.paused) await video.play().catch(()=>{});
     else video.pause();
     setPlayIcon();
     showControls();
   };
 
-  rewind5Btn.onclick = (e) => {
+  document.getElementById("rew").onclick = e => {
     e.stopPropagation();
-    if (isFinite(video.duration)) video.currentTime = Math.max(0, video.currentTime - 5);
+    if(isFinite(video.duration)) video.currentTime = Math.max(0, video.currentTime - 5);
     showControls();
   };
 
-  forward15Btn.onclick = (e) => {
+  document.getElementById("fwd").onclick = e => {
     e.stopPropagation();
-    if (isFinite(video.duration)) video.currentTime = Math.min(video.duration, video.currentTime + 15);
+    if(isFinite(video.duration)) video.currentTime = Math.min(video.duration, video.currentTime + 15);
     showControls();
   };
 
-  muteBtn.onclick = (e) => {
+  muteBtn.onclick = e => {
     e.stopPropagation();
     video.muted = !video.muted;
-    updateMuteIcon();
-    flashLabel(video.muted ? "الصوت: كتم" : "الصوت: تشغيل");
+    setMuteIcon();
+    flash(video.muted ? "الصوت: كتم" : "الصوت: تشغيل");
     showControls();
   };
 
-  fitBtn.onclick = (e) => {
+  fitBtn.onclick = e => {
     e.stopPropagation();
-    const modes = ["fit-fill", "fit-contain", "fit-cover"];
-    const names = ["تمدد", "ملاءمة", "قص"];
-
-    video.classList.remove("fit-fill", "fit-contain", "fit-cover");
+    const modes = ["fit-fill","fit-contain","fit-cover"];
+    const names = ["تمدد","ملاءمة","قص"];
+    video.classList.remove(...modes);
     fitIndex = (fitIndex + 1) % modes.length;
     video.classList.add(modes[fitIndex]);
-    flashLabel("العرض: " + names[fitIndex]);
+    flash("العرض: " + names[fitIndex]);
     showControls();
   };
 
-  rotateBtn.onclick = (e) => {
+  rotateBtn.onclick = e => {
     e.stopPropagation();
     rotated = !rotated;
     video.style.transform = rotated ? "rotate(90deg) scale(1.02)" : "";
-    flashLabel(rotated ? "تم تفعيل التدوير" : "تم إيقاف التدوير");
+    flash(rotated ? "تم تفعيل التدوير" : "تم إيقاف التدوير");
     showControls();
   };
 
-  qualityBtn.onclick = (e) => {
+  qualityBtn.onclick = e => {
     e.stopPropagation();
-    buildQualityMenu();
-    qualityMenu.classList.toggle("visible");
+    if(hls) buildHlsQuality();
+    if(shakaPlayer) buildShakaQuality();
+    qMenu.classList.toggle("visible");
     showControls();
   };
 
-  castBtn.onclick = (e) => {
-    e.stopPropagation();
-    flashLabel("ميزة Cast ستتوفر هنا");
+  progress.onclick = e => {
+    const d = video.duration || 0;
+    if(!(d > 0 && isFinite(d))) return;
+    const r = progress.getBoundingClientRect();
+    const ratio = (e.clientX - r.left) / r.width;
+    video.currentTime = Math.max(0, Math.min(d, ratio * d));
     showControls();
   };
 
-  progressWrapper.onclick = (e) => {
-    const dur = video.duration || 0;
-    if (!(dur > 0 && isFinite(dur))) return;
+  document.getElementById("retry").onclick = playStream;
+  document.getElementById("back").onclick = () => history.back();
 
-    const rect = progressWrapper.getBoundingClientRect();
-    const ratio = (e.clientX - rect.left) / rect.width;
-    video.currentTime = Math.max(0, Math.min(dur, ratio * dur));
-    showControls();
-  };
-
-  retryBtn.onclick = () => playVideo();
-  backBtn.onclick = () => history.back();
-
-  video.addEventListener("waiting", () => bufferSpinner.style.display = "block");
-  video.addEventListener("playing", () => bufferSpinner.style.display = "none");
+  video.addEventListener("waiting",()=>buffer.style.display="block");
+  video.addEventListener("playing",()=>buffer.style.display="none");
   video.addEventListener("timeupdate", updateProgress);
   video.addEventListener("loadedmetadata", updateProgress);
   video.addEventListener("play", setPlayIcon);
   video.addEventListener("pause", setPlayIcon);
-  document.getElementById("playerWrapper").onclick = showControls;
+  document.getElementById("wrap").onclick = showControls;
 
   video.muted = false;
   video.volume = 1;
-  updateMuteIcon();
+  setMuteIcon();
   setPlayIcon();
   showControls();
-  playVideo();
+  playStream();
 });
 </script>
 </body>
