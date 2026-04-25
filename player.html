@@ -19,6 +19,32 @@ video.fit-contain{object-fit:contain!important}
 video.fit-cover{object-fit:cover!important}
 video.fit-fill{object-fit:fill!important}
 
+.server-bar{
+  position:absolute;
+  top:64px;
+  left:0;
+  right:0;
+  z-index:120;
+  display:none;
+  gap:8px;
+  padding:8px 12px;
+  overflow-x:auto;
+  background:linear-gradient(to bottom,rgba(0,0,0,.55),transparent);
+}
+.server-bar.visible{display:flex}
+.server-btn{
+  flex:0 0 auto;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.12);
+  color:#fff;
+  padding:8px 14px;
+  border-radius:999px;
+  font-family:Tajawal,sans-serif;
+  font-weight:800;
+  cursor:pointer;
+}
+.server-btn.active{background:#fff;color:#000}
+
 #loading,#buffer{
 position:absolute;z-index:60;top:50%;left:50%;transform:translate(-50%,-50%);
 border-radius:50%;border:5px solid rgba(255,255,255,.25);border-top-color:#fff;
@@ -89,6 +115,8 @@ background:rgba(0,0,0,.65);color:#fff;padding:7px 13px;border-radius:999px;displ
 <body>
 <div id="player-root">
 <div class="player-wrapper" id="wrap">
+
+<div class="server-bar" id="serverBar"></div>
 
 <video id="video" playsinline autoplay></video>
 
@@ -164,6 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const time = $("time");
   const live = $("live");
   const toast = $("toast");
+  const serverBar = $("serverBar");
 
   const WORKER = "https://ali.albesriali8.workers.dev/";
 
@@ -173,8 +202,74 @@ document.addEventListener("DOMContentLoaded", () => {
   let fitIndex = 0;
   let rotated = false;
   let currentEngine = "";
+  let serverList = [];
+  let activeServerIndex = 0;
+
+  function decodeServersParam(){
+    const p = new URLSearchParams(location.search);
+    let raw = p.get("servers") || "";
+    if(!raw) return null;
+
+    try{
+      raw = decodeURIComponent(raw);
+      const json = decodeURIComponent(escape(atob(raw)));
+      return JSON.parse(json);
+    }catch(e){
+      return null;
+    }
+  }
+
+  function buildServerButtons(){
+    const data = decodeServersParam();
+    if(!data || !Array.isArray(data.servers) || !data.servers.length) return;
+
+    serverList = data.servers;
+
+    if(data.title){
+      titleEl.textContent = data.title;
+    }
+
+    serverBar.innerHTML = serverList.map((s,i)=>`
+      <button class="server-btn ${i===0?'active':''}" data-index="${i}">
+        ${s.name || 'سيرفر ' + (i+1)}
+      </button>
+    `).join("");
+
+    serverBar.classList.add("visible");
+
+    serverBar.querySelectorAll(".server-btn").forEach(btn=>{
+      btn.onclick = async (e)=>{
+        e.stopPropagation();
+
+        activeServerIndex = parseInt(btn.dataset.index,10);
+
+        serverBar.querySelectorAll(".server-btn").forEach(x=>x.classList.remove("active"));
+        btn.classList.add("active");
+
+        await playStream();
+      };
+    });
+  }
 
   function getParams(){
+    const serversData = decodeServersParam();
+
+    if(serversData && Array.isArray(serversData.servers) && serversData.servers[activeServerIndex]){
+      const s = serversData.servers[activeServerIndex];
+
+      return {
+        url: s.url || "",
+        title: s.name || serversData.title || "BSR Player",
+        ck: s.ck || "",
+        ref: s.ref || "",
+        origin: s.origin || "",
+        ua: s.ua || "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
+        auth: s.auth || "",
+        cookie: s.cookie || "",
+        forceWorker: s.worker === "1"
+      };
+    }
+
     const p = new URLSearchParams(location.search);
 
     const get = k => {
@@ -226,12 +321,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function shouldUseWorker(params){
-    const u = params.url.toLowerCase();
+    const u = (params.url || "").toLowerCase();
 
     if(params.forceWorker) return true;
-
     if(isMpd(params.url)) return false;
-
     if(u.startsWith("http://")) return true;
     if(isHls(params.url)) return true;
 
@@ -350,7 +443,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const params = getParams();
 
     if(!params.url){
-      showError("لا يوجد رابط", "افتح المشغل هكذا: player.html?url=رابط_القناة");
+      showError("لا يوجد رابط", "افتح المشغل هكذا: player.html?url=رابط_القناة أو player.html?servers=الكود");
       return;
     }
 
@@ -665,6 +758,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setMuteIcon();
   setPlayIcon();
   showControls();
+  buildServerButtons();
   playStream();
 });
 </script>
