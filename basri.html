@@ -4,32 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-
-<script>
+<script id="bsr-domain-lock">
 (function(){
-  "use strict";
-  /* حماية تشغيل القالب على موقع البصري فقط */
-  var allowedHosts = [
-    "albasri-tv.github.io"
-  ];
-  var allowedPath = "/basri.html";
+  'use strict';
+  var _d=function(s){return decodeURIComponent(escape(atob(s)))};
+  var H=_d('YWxiYXNyaS10di5naXRodWIuaW8='), P=_d('L2Jhc3JpLmh0bWw='), U=_d('aHR0cHM6Ly9hbGJhc3JpLXR2LmdpdGh1Yi5pby9iYXNyaS5odG1s');
+  var T='موقع محمي', M='هذا الكود محمي بالبصري ولا يعمل خارج موقعه الرسمي.';
   function deny(){
     try{document.documentElement.innerHTML='';}catch(e){}
-    document.open();
-    document.write('<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Access Denied</title><style>body{margin:0;background:#0b1220;color:#fff;font-family:Tahoma,Arial;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:20px}.box{max-width:440px;background:#111827;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:28px;box-shadow:0 20px 50px rgba(0,0,0,.35)}h2{margin:0 0 10px;color:#ef4444}p{color:#cbd5e1;line-height:1.8}</style></head><body><div class="box"><h2>تم منع التشغيل</h2><p>هذا القالب محمي ولا يعمل إلا داخل موقع البصري الرسمي.</p></div></body></html>');
-    document.close();
-    throw new Error("Protected template: unauthorized host");
+    try{document.open();document.write('<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+T+'</title><style>body{margin:0;background:#0b1220;color:#fff;font-family:Arial,Tahoma,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center}.box{max-width:520px;background:#111827;border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.35)}p{color:#cbd5e1;font-size:16px;line-height:1.8}a{display:inline-block;margin-top:14px;color:#000;background:#fff;text-decoration:none;border-radius:999px;padding:10px 18px;font-weight:800}</style></head><body><div class="box"><h2>'+T+'</h2><p>'+M+'</p><a href="'+U+'">فتح الموقع الرسمي</a></div></body></html>');document.close();}catch(e){}
+    try{setTimeout(function(){location.replace(U)},1600)}catch(e){}
+    throw new Error('BSR_DOMAIN_LOCK');
   }
-  var host = String(location.hostname || "").toLowerCase();
-  var path = String(location.pathname || "/");
-  var okHost = allowedHosts.indexOf(host) !== -1;
-  var okPath = (path === allowedPath || path === allowedPath + "/" || path === "/" || path.endsWith("/basri.html"));
-  var isLocalPreview = host === "localhost" || host === "127.0.0.1" || host === "";
-  if(!isLocalPreview && (!okHost || !okPath)) deny();
-  Object.defineProperty(window, "__BSR_ALLOWED_SITE__", {value:true, writable:false, configurable:false});
+  function ok(){
+    var h=(location.hostname||'').toLowerCase(), p=location.pathname||'', pr=(location.protocol||'').toLowerCase();
+    if(pr==='file:') return false;
+    if(h!==H) return false;
+    if(p!==P && p!=='/' && p!=='') return false;
+    try{if(window.top!==window.self && document.referrer && document.referrer.indexOf(H)===-1) return false;}catch(e){return false;}
+    return true;
+  }
+  if(!ok()) deny();
+  var key=Math.random().toString(36).slice(2)+Date.now().toString(36);
+  Object.defineProperty(window,'__BSR_LOCK__',{value:key,writable:false,configurable:false});
+  setInterval(function(){try{if(window.__BSR_LOCK__!==key || !ok() || !document.getElementById('bsr-domain-lock')) deny();}catch(e){deny();}},1200);
 })();
 </script>
-
 <title>البصري تيفي للبث المباشر </title>
 
 <meta name="description" content="مشاهدة مباريات اليوم بث مباشر بدون تقطيع، بث مباشر القنوات الرياضية HD، جدول مباريات اليوم، متابعة جميع الدوريات العالمية بجودة عالية.">
@@ -111,6 +111,7 @@ watch soccer live hd
 <meta name="author" content="BSR Live">
 <meta name="language" content="Arabic">
 <meta name="theme-color" content="#0b1220">
+<meta name="bsr-official-domain" content="albasri-tv.github.io/basri.html">
 
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
@@ -687,7 +688,6 @@ video.fit-fill{object-fit:fill!important}
 
 <script>
 document.addEventListener("DOMContentLoaded", function(){
-  if(window.__BSR_ALLOWED_SITE__ !== true){ document.body.innerHTML = ""; return; }
   feather.replace();
 
   const firebaseConfig = {
