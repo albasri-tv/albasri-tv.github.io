@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>BSR Hybrid Player</title>
+<title>BSR Player</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.13/shaka-player.compiled.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.13/shaka-player.compiled.js"></script>
 
 <style>
 *{box-sizing:border-box;user-select:none}
@@ -21,27 +21,29 @@ video.fit-fill{object-fit:fill!important}
 
 .server-bar{
   position:absolute;
-  top:64px;
+  top:62px;
   left:0;
-  right:0;
-  z-index:120;
+  right:auto;
+  z-index:130;
   display:none;
   gap:8px;
   padding:8px 12px;
+  max-width:100%;
   overflow-x:auto;
-  background:linear-gradient(to bottom,rgba(0,0,0,.55),transparent);
+  direction:ltr;
 }
 .server-bar.visible{display:flex}
 .server-btn{
   flex:0 0 auto;
-  border:1px solid rgba(255,255,255,.18);
-  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.22);
+  background:rgba(0,0,0,.55);
   color:#fff;
   padding:8px 14px;
   border-radius:999px;
   font-family:Tajawal,sans-serif;
   font-weight:800;
   cursor:pointer;
+  backdrop-filter:blur(10px);
 }
 .server-btn.active{background:#fff;color:#000}
 
@@ -93,8 +95,8 @@ background:linear-gradient(to top,rgba(0,0,0,.84),transparent);opacity:0;transit
 .progress{height:5px;background:rgba(255,255,255,.25);border-radius:999px;position:relative;margin-bottom:12px;overflow:hidden}
 .played{position:absolute;left:0;top:0;bottom:0;width:0;background:#fff}
 .thumb{position:absolute;top:50%;left:0;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:#fff}
-.row{display:flex;align-items:center;gap:10px}
-.icons{display:flex;gap:10px;direction:ltr;flex:1}
+.row{display:flex;align-items:center;gap:10px;direction:rtl}
+.icons{display:flex;gap:10px;direction:ltr;justify-content:flex-start;flex:1}
 .time{color:#fff;font-size:14px;direction:ltr;min-width:110px;text-align:left}
 .live{display:none;color:#fff;font-weight:900;align-items:center;gap:7px}
 .live span{width:8px;height:8px;background:red;border-radius:50%;box-shadow:0 0 10px red}
@@ -117,7 +119,6 @@ background:rgba(0,0,0,.65);color:#fff;padding:7px 13px;border-radius:999px;displ
 <div class="player-wrapper" id="wrap">
 
 <div class="server-bar" id="serverBar"></div>
-
 <video id="video" playsinline autoplay></video>
 
 <div class="top" id="top">
@@ -152,7 +153,11 @@ background:rgba(0,0,0,.65);color:#fff;padding:7px 13px;border-radius:999px;displ
       <button class="icon" id="mute"><i data-feather="volume-x"></i></button>
       <button class="icon" id="fit"><i data-feather="maximize-2"></i></button>
       <button class="icon" id="quality"><i data-feather="settings"></i></button>
-      <button class="icon" id="rotate"><i data-feather="rotate-cw"></i></button>
+      <button class="icon" id="ccBtn"><i data-feather="message-square"></i></button>
+      <button class="icon" id="audioBtn"><i data-feather="globe"></i></button>
+      <button class="icon" id="castBtn"><i data-feather="cast"></i></button>
+      <button class="icon" id="pipBtn"><i data-feather="airplay"></i></button>
+      <button class="icon" id="fullBtn"><i data-feather="maximize"></i></button>
     </div>
     <div class="live" id="live"><span></span>A LIVE</div>
     <div class="time" id="time">00:00 • 00:00</div>
@@ -170,590 +175,206 @@ document.addEventListener("DOMContentLoaded", () => {
   feather.replace();
 
   const $ = id => document.getElementById(id);
-  const video = $("video");
-  const topBar = $("top");
-  const bottom = $("bottom");
-  const center = $("center");
-  const loading = $("loading");
-  const buffer = $("buffer");
-  const errorBox = $("error");
-  const errTitle = $("errTitle");
-  const errMsg = $("errMsg");
-  const titleEl = $("title");
-  const playBtn = $("play");
-  const muteBtn = $("mute");
-  const fitBtn = $("fit");
-  const rotateBtn = $("rotate");
-  const qualityBtn = $("quality");
-  const qMenu = $("qMenu");
-  const progress = $("progress");
-  const played = $("played");
-  const thumb = $("thumb");
-  const time = $("time");
-  const live = $("live");
-  const toast = $("toast");
-  const serverBar = $("serverBar");
+  const video = $("video"), topBar = $("top"), bottom = $("bottom"), center = $("center");
+  const loading = $("loading"), buffer = $("buffer"), errorBox = $("error");
+  const errTitle = $("errTitle"), errMsg = $("errMsg"), titleEl = $("title");
+  const playBtn = $("play"), muteBtn = $("mute"), fitBtn = $("fit"), qualityBtn = $("quality");
+  const ccBtn = $("ccBtn"), audioBtn = $("audioBtn"), castBtn = $("castBtn"), pipBtn = $("pipBtn"), fullBtn = $("fullBtn");
+  const qMenu = $("qMenu"), progress = $("progress"), played = $("played"), thumb = $("thumb");
+  const time = $("time"), live = $("live"), toast = $("toast"), serverBar = $("serverBar");
 
   const WORKER = "https://ali.albesriali8.workers.dev/";
+  let hls = null, shakaPlayer = null, hideTimer = null, fitIndex = 0, currentEngine = "";
+  let serverList = [], activeServerIndex = 0;
 
-  let hls = null;
-  let shakaPlayer = null;
-  let hideTimer = null;
-  let fitIndex = 0;
-  let rotated = false;
-  let currentEngine = "";
-  let serverList = [];
-  let activeServerIndex = 0;
+  const getP = () => new URLSearchParams(location.search);
+  const get = k => { let v = getP().get(k)||""; try{v=decodeURIComponent(v)}catch{} return v; };
 
   function decodeServersParam(){
-    const p = new URLSearchParams(location.search);
-    let raw = p.get("servers") || "";
-    if(!raw) return null;
-
-    try{
-      raw = decodeURIComponent(raw);
-      const json = decodeURIComponent(escape(atob(raw)));
-      return JSON.parse(json);
-    }catch(e){
-      return null;
-    }
+    let raw = get("servers"); if(!raw) return null;
+    try{return JSON.parse(decodeURIComponent(escape(atob(raw))))}catch{return null}
   }
 
   function buildServerButtons(){
     const data = decodeServersParam();
     if(!data || !Array.isArray(data.servers) || !data.servers.length) return;
-
     serverList = data.servers;
-
-    if(data.title){
-      titleEl.textContent = data.title;
-    }
-
-    serverBar.innerHTML = serverList.map((s,i)=>`
-      <button class="server-btn ${i===0?'active':''}" data-index="${i}">
-        ${s.name || 'سيرفر ' + (i+1)}
-      </button>
-    `).join("");
-
+    serverBar.innerHTML = serverList.map((s,i)=>`<button class="server-btn ${i===0?'active':''}" data-index="${i}">${s.name||'Server '+(i+1)}</button>`).join("");
     serverBar.classList.add("visible");
-
     serverBar.querySelectorAll(".server-btn").forEach(btn=>{
-      btn.onclick = async (e)=>{
+      btn.onclick = async e => {
         e.stopPropagation();
-
-        activeServerIndex = parseInt(btn.dataset.index,10);
-
+        activeServerIndex = +btn.dataset.index;
         serverBar.querySelectorAll(".server-btn").forEach(x=>x.classList.remove("active"));
         btn.classList.add("active");
-
         await playStream();
       };
     });
   }
 
   function getParams(){
-    const serversData = decodeServersParam();
-
-    if(serversData && Array.isArray(serversData.servers) && serversData.servers[activeServerIndex]){
-      const s = serversData.servers[activeServerIndex];
-
-      return {
-        url: s.url || "",
-        title: s.name || serversData.title || "BSR Player",
-        ck: s.ck || "",
-        ref: s.ref || "",
-        origin: s.origin || "",
-        ua: s.ua || "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
-        auth: s.auth || "",
-        cookie: s.cookie || "",
-        forceWorker: s.worker === "1"
-      };
-    }
-
-    const p = new URLSearchParams(location.search);
-
-    const get = k => {
-      let v = p.get(k) || "";
-      try { v = decodeURIComponent(v); } catch(e) {}
-      return v;
-    };
-
-    return {
-      url: get("url"),
-      title: get("title") || "BSR Player",
-      ck: get("ck"),
-      ref: get("ref"),
-      origin: get("origin"),
-      ua: get("ua") || "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
-      auth: get("auth"),
-      cookie: get("cookie"),
-      forceWorker: get("worker") === "1"
-    };
+    const s = decodeServersParam();
+    if(s?.servers?.[activeServerIndex]) return s.servers[activeServerIndex];
+    return { url:get("url"), title:get("title")||"BSR Player", ck:get("ck"), ref:get("ref"), ua:get("ua")||navigator.userAgent };
   }
 
-  function isMpd(u){
-    return (u || "").toLowerCase().includes(".mpd") || (u || "").toLowerCase().includes("manifest.mpd");
-  }
-
-  function isHls(u){
-    const x = (u || "").toLowerCase();
-    return x.includes(".m3u8") || x.includes(".png") || x.includes("#hls") || x.includes(".json");
-  }
-
-  function proxyUrl(u, ref, origin, ua){
-    if(!u) return u;
-    if(u.startsWith(WORKER)) return u;
-
+  const isMpd = u => (u||"").toLowerCase().includes(".mpd");
+  const isHls = u => { u=(u||"").toLowerCase(); return u.includes(".m3u8")||u.includes(".png")||u.includes("#hls")||u.includes(".json"); };
+  const proxyUrl = (u,ref,ua) => {
     const p = new URLSearchParams();
     p.set("url", u.replace("#hls",""));
-    p.set("ua", ua);
-
-    try{
-      const site = new URL(u.replace("#hls",""));
-      p.set("ref", ref || site.origin + "/");
-      p.set("origin", origin || site.origin);
-    }catch(e){
-      if(ref) p.set("ref", ref);
-      if(origin) p.set("origin", origin);
-    }
-
+    p.set("ua", ua||navigator.userAgent);
+    try{ const x = new URL(u.replace("#hls","")); p.set("ref", ref||x.origin+"/"); }catch{}
     return WORKER + "?" + p.toString();
-  }
+  };
+  const finalUrl = p => (isMpd(p.url) ? p.url : proxyUrl(p.url,p.ref,p.ua));
 
-  function shouldUseWorker(params){
-    const u = (params.url || "").toLowerCase();
-
-    if(params.forceWorker) return true;
-    if(isMpd(params.url)) return false;
-    if(u.startsWith("http://")) return true;
-    if(isHls(params.url)) return true;
-
-    return false;
-  }
-
-  function finalUrl(params){
-    if(shouldUseWorker(params)){
-      return proxyUrl(params.url, params.ref, params.origin, params.ua);
-    }
-    return params.url;
-  }
-
-  function parseClearKey(ck){
-    if(!ck || !ck.includes(":")) return null;
-
-    const [kid, key] = ck.split(":");
-    const cleanKid = kid.trim().replace(/-/g,"").toLowerCase();
-    const cleanKey = key.trim().replace(/-/g,"").toLowerCase();
-
-    if(!/^[0-9a-f]+$/.test(cleanKid)) return null;
-    if(!/^[0-9a-f]+$/.test(cleanKey)) return null;
-
-    return { kid: cleanKid, key: cleanKey };
-  }
-
-  function showControls(){
-    topBar.classList.add("visible");
-    bottom.classList.add("visible");
-    center.classList.add("visible");
-
+  const showControls = () => {
+    topBar.classList.add("visible"); bottom.classList.add("visible"); center.classList.add("visible");
     clearTimeout(hideTimer);
-    hideTimer = setTimeout(() => {
-      topBar.classList.remove("visible");
-      bottom.classList.remove("visible");
-      center.classList.remove("visible");
-      qMenu.classList.remove("visible");
-    }, 2800);
-  }
+    hideTimer = setTimeout(()=>{ topBar.classList.remove("visible"); bottom.classList.remove("visible"); center.classList.remove("visible"); qMenu.classList.remove("visible"); }, 2800);
+  };
 
-  function showError(title, msg){
-    loading.style.display = "none";
-    buffer.style.display = "none";
-    errTitle.textContent = title;
-    errMsg.textContent = msg;
-    errorBox.style.display = "flex";
-    feather.replace();
-  }
-
-  function hideError(){
-    errorBox.style.display = "none";
-  }
-
-  function flash(text){
-    toast.textContent = text;
-    toast.style.display = "block";
-    setTimeout(() => toast.style.display = "none", 1300);
-  }
-
-  function setPlayIcon(){
-    playBtn.innerHTML = `<i data-feather="${video.paused ? "play" : "pause"}"></i>`;
-    feather.replace();
-  }
-
-  function setMuteIcon(){
-    muteBtn.innerHTML = `<i data-feather="${video.muted ? "volume-x" : "volume-2"}"></i>`;
-    feather.replace();
-  }
-
-  function fmt(s){
-    if(!isFinite(s) || s < 0) return "00:00";
-
-    const sec = Math.floor(s % 60).toString().padStart(2,"0");
-    const min = Math.floor((s / 60) % 60).toString().padStart(2,"0");
-    const hr = Math.floor(s / 3600);
-
-    return hr > 0 ? `${hr}:${min}:${sec}` : `${min}:${sec}`;
-  }
+  const flash = t => { toast.textContent=t; toast.style.display="block"; setTimeout(()=>toast.style.display="none",1300); };
+  const setPlayIcon = () => { playBtn.innerHTML=`<i data-feather="${video.paused?'play':'pause'}"></i>`; feather.replace(); };
+  const setMuteIcon = () => { muteBtn.innerHTML=`<i data-feather="${video.muted?'volume-x':'volume-2'}"></i>`; feather.replace(); };
+  const fmt = s => !isFinite(s)||s<0 ? "00:00" : `${Math.floor(s/60)%60}`.padStart(2,"0")+":"+`${Math.floor(s%60)}`.padStart(2,"0");
 
   function updateProgress(){
-    const d = video.duration || 0;
-    const c = video.currentTime || 0;
-
-    if(d > 0 && isFinite(d)){
-      const r = (c / d) * 100;
-      played.style.width = r + "%";
-      thumb.style.left = r + "%";
-      time.style.display = "block";
-      live.style.display = "none";
-      time.textContent = `${fmt(c)} • ${fmt(d)}`;
-    } else {
-      played.style.width = "100%";
-      thumb.style.left = "100%";
-      time.style.display = "none";
-      live.style.display = "flex";
-    }
+    const d=video.duration||0,c=video.currentTime||0;
+    if(d>0&&isFinite(d)){ const r=(c/d)*100; played.style.width=r+"%"; thumb.style.left=r+"%"; time.style.display="block"; live.style.display="none"; time.textContent=`${fmt(c)} • ${fmt(d)}`; }
+    else { played.style.width="100%"; thumb.style.left="100%"; time.style.display="none"; live.style.display="flex"; }
   }
 
   async function destroyPlayers(){
-    if(hls){
-      hls.destroy();
-      hls = null;
-    }
-
-    if(shakaPlayer){
-      await shakaPlayer.destroy().catch(()=>{});
-      shakaPlayer = null;
-    }
-
-    video.removeAttribute("src");
-    video.load();
-    currentEngine = "";
+    if(hls){ hls.destroy(); hls=null; }
+    if(shakaPlayer){ await shakaPlayer.destroy().catch(()=>{}); shakaPlayer=null; }
+    video.removeAttribute("src"); video.load(); currentEngine="";
   }
 
   async function playStream(){
-    const params = getParams();
+    const p = getParams();
+    if(!p.url){ errTitle.textContent="لا يوجد رابط"; errMsg.textContent="الرابط غير صالح"; errorBox.style.display="flex"; return; }
 
-    if(!params.url){
-      showError("لا يوجد رابط", "افتح المشغل هكذا: player.html?url=رابط_القناة أو player.html?servers=الكود");
-      return;
-    }
-
-    titleEl.textContent = params.title;
-    hideError();
-    loading.style.display = "block";
-    buffer.style.display = "none";
-
-    const src = finalUrl(params);
+    titleEl.textContent = p.title || "BSR Player";
+    errorBox.style.display="none"; loading.style.display="block"; buffer.style.display="none";
 
     try{
       await destroyPlayers();
+      const src = finalUrl(p);
 
-      if(isMpd(params.url)){
-        currentEngine = "shaka";
-
+      if(isMpd(p.url)){
+        currentEngine="shaka";
         shaka.polyfill.installAll();
-
-        if(!shaka.Player.isBrowserSupported()){
-          showError("غير مدعوم", "المتصفح لا يدعم MPD / DASH");
-          return;
-        }
-
         shakaPlayer = new shaka.Player(video);
 
-        shakaPlayer.addEventListener("error", event => {
-          const msg = event.detail?.message || JSON.stringify(event.detail) || "تعذر تشغيل MPD";
-          showError("خطأ MPD", msg);
-        });
+        if(p.ck && p.ck.includes(":")){
+          const [kid,key] = p.ck.split(":");
+          shakaPlayer.configure({ drm:{ clearKeys:{ [kid.trim()]: key.trim() } } });
+        }
 
         const net = shakaPlayer.getNetworkingEngine();
         if(net){
-          net.registerRequestFilter((type, request) => {
-            if(params.ua) request.headers["User-Agent"] = params.ua;
-            if(params.ref) request.headers["Referer"] = params.ref;
-
-            if(params.origin){
-              request.headers["Origin"] = params.origin;
-            } else if(params.ref){
-              try { request.headers["Origin"] = new URL(params.ref).origin; } catch(e){}
-            }
-
-            if(params.auth) request.headers["Authorization"] = params.auth;
-            if(params.cookie) request.headers["Cookie"] = params.cookie;
+          net.registerRequestFilter((type, req) => {
+            if(p.ua) req.headers["User-Agent"] = p.ua;
+            if(p.ref) req.headers["Referer"] = p.ref;
           });
         }
 
-        const ck = parseClearKey(params.ck);
-        if(ck){
-          shakaPlayer.configure({
-            drm: {
-              clearKeys: {
-                [ck.kid]: ck.key
-              }
-            }
-          });
-        }
-
-        shakaPlayer.addEventListener("buffering", e => {
-          buffer.style.display = e.buffering ? "block" : "none";
+        shakaPlayer.addEventListener("error", e => {
+          errTitle.textContent="خطأ MPD"; errMsg.textContent=e.detail?.message||"تعذر تشغيل MPD"; errorBox.style.display="flex";
         });
 
         await shakaPlayer.load(src);
-
-        loading.style.display = "none";
-        await video.play().catch(()=>{});
-        setPlayIcon();
-        setMuteIcon();
-        buildShakaQuality();
-        showControls();
-
+        loading.style.display="none";
+        await video.play().catch(async()=>{ video.muted=true; await video.play().catch(()=>{}); });
+        setPlayIcon(); setMuteIcon(); showControls();
       } else {
-        currentEngine = "hls";
+        currentEngine="hls";
 
         if(Hls.isSupported()){
-          hls = new Hls({
-            enableWorker: true,
-            lowLatencyMode: false,
-            maxBufferLength: 30,
-            backBufferLength: 90,
-            liveSyncDuration: 4
-          });
-
+          hls = new Hls({ enableWorker:true, lowLatencyMode:false, maxBufferLength:30, backBufferLength:90, liveSyncDuration:4 });
           hls.loadSource(src);
           hls.attachMedia(video);
 
-          hls.on(Hls.Events.MANIFEST_PARSED, async () => {
-            loading.style.display = "none";
-            buildHlsQuality();
-            await video.play().catch(()=>{});
-            setPlayIcon();
-            setMuteIcon();
-            showControls();
+          hls.on(Hls.Events.MANIFEST_PARSED, async ()=>{
+            loading.style.display="none";
+            await video.play().catch(async()=>{ video.muted=true; await video.play().catch(()=>{}); });
+            setPlayIcon(); setMuteIcon(); showControls();
           });
 
-          hls.on(Hls.Events.ERROR, (event, data) => {
+          hls.on(Hls.Events.ERROR, (_,data)=>{
             if(data.fatal){
-              if(data.type === Hls.ErrorTypes.NETWORK_ERROR){
-                hls.startLoad();
-                flash("إعادة الاتصال");
-              } else if(data.type === Hls.ErrorTypes.MEDIA_ERROR){
-                hls.recoverMediaError();
-                flash("إصلاح الفيديو");
-              } else {
-                showError("خطأ HLS", data.details || "تعذر تشغيل الرابط");
-              }
+              if(data.type===Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+              else if(data.type===Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+              else { errTitle.textContent="خطأ HLS"; errMsg.textContent=data.details||"تعذر التشغيل"; errorBox.style.display="flex"; }
             }
           });
 
-        } else if(video.canPlayType("application/vnd.apple.mpegurl")){
-          video.src = src;
-          video.addEventListener("loadedmetadata", async () => {
-            loading.style.display = "none";
-            await video.play().catch(()=>{});
-            setPlayIcon();
-            showControls();
-          }, { once:true });
-
         } else {
           video.src = src;
-          loading.style.display = "none";
-          await video.play().catch(()=>{});
-          setPlayIcon();
-          showControls();
+          loading.style.display="none";
+          await video.play().catch(async()=>{ video.muted=true; await video.play().catch(()=>{}); });
+          setPlayIcon(); setMuteIcon(); showControls();
         }
       }
-
-    } catch(e){
-      showError("فشل التشغيل", e.message || String(e));
+    }catch(e){
+      errTitle.textContent="فشل التشغيل"; errMsg.textContent=e.message||String(e); errorBox.style.display="flex";
     }
   }
 
-  function buildHlsQuality(){
-    if(!hls){
-      qMenu.innerHTML = "";
-      return;
-    }
+  playBtn.onclick = async e => { e.stopPropagation(); if(video.paused) await video.play().catch(()=>{}); else video.pause(); setPlayIcon(); showControls(); };
+  $("rew").onclick = e => { e.stopPropagation(); if(isFinite(video.duration)) video.currentTime=Math.max(0,video.currentTime-5); showControls(); };
+  $("fwd").onclick = e => { e.stopPropagation(); if(isFinite(video.duration)) video.currentTime=Math.min(video.duration,video.currentTime+15); showControls(); };
 
-    let html = `<button class="active" data-level="-1">تلقائي Auto</button>`;
-
-    (hls.levels || []).forEach((level, i) => {
-      html += `<button data-level="${i}">${level.height ? level.height + "p" : "Quality " + (i+1)}</button>`;
-    });
-
-    qMenu.innerHTML = html;
-
-    qMenu.querySelectorAll("button").forEach(btn => {
-      btn.onclick = e => {
-        e.stopPropagation();
-
-        hls.currentLevel = parseInt(btn.dataset.level, 10);
-
-        qMenu.querySelectorAll("button").forEach(x => x.classList.remove("active"));
-        btn.classList.add("active");
-
-        flash("الجودة: " + btn.textContent);
-        qMenu.classList.remove("visible");
-        showControls();
-      };
-    });
-  }
-
-  function buildShakaQuality(){
-    if(!shakaPlayer){
-      qMenu.innerHTML = "";
-      return;
-    }
-
-    const tracks = shakaPlayer.getVariantTracks()
-      .filter(t => t.height)
-      .sort((a,b) => (b.height || 0) - (a.height || 0));
-
-    const seen = new Set();
-    const unique = [];
-
-    tracks.forEach(t => {
-      if(!seen.has(t.height)){
-        seen.add(t.height);
-        unique.push(t);
-      }
-    });
-
-    let html = `<button class="active" data-id="auto">تلقائي Auto</button>`;
-
-    unique.forEach(t => {
-      html += `<button data-id="${t.id}">${t.height}p</button>`;
-    });
-
-    qMenu.innerHTML = html;
-
-    qMenu.querySelectorAll("button").forEach(btn => {
-      btn.onclick = e => {
-        e.stopPropagation();
-
-        if(btn.dataset.id === "auto"){
-          shakaPlayer.configure({ abr: { enabled:true } });
-        } else {
-          shakaPlayer.configure({ abr: { enabled:false } });
-
-          const tr = tracks.find(x => String(x.id) === btn.dataset.id);
-          if(tr) shakaPlayer.selectVariantTrack(tr, true);
-        }
-
-        qMenu.querySelectorAll("button").forEach(x => x.classList.remove("active"));
-        btn.classList.add("active");
-
-        flash("الجودة: " + btn.textContent);
-        qMenu.classList.remove("visible");
-        showControls();
-      };
-    });
-  }
-
-  playBtn.onclick = async e => {
-    e.stopPropagation();
-
-    if(video.paused) await video.play().catch(()=>{});
-    else video.pause();
-
-    setPlayIcon();
-    showControls();
-  };
-
-  $("rew").onclick = e => {
-    e.stopPropagation();
-
-    if(isFinite(video.duration)){
-      video.currentTime = Math.max(0, video.currentTime - 5);
-    }
-
-    showControls();
-  };
-
-  $("fwd").onclick = e => {
-    e.stopPropagation();
-
-    if(isFinite(video.duration)){
-      video.currentTime = Math.min(video.duration, video.currentTime + 15);
-    }
-
-    showControls();
-  };
-
-  muteBtn.onclick = e => {
-    e.stopPropagation();
-
-    video.muted = !video.muted;
-    setMuteIcon();
-    flash(video.muted ? "الصوت: كتم" : "الصوت: تشغيل");
-    showControls();
-  };
-
+  muteBtn.onclick = e => { e.stopPropagation(); video.muted=!video.muted; setMuteIcon(); flash(video.muted?"الصوت: كتم":"الصوت: تشغيل"); showControls(); };
   fitBtn.onclick = e => {
     e.stopPropagation();
+    const modes=["fit-fill","fit-contain","fit-cover"], names=["تمدد","ملاءمة","قص"];
+    video.classList.remove(...modes); fitIndex=(fitIndex+1)%modes.length; video.classList.add(modes[fitIndex]);
+    flash("العرض: "+names[fitIndex]); showControls();
+  };
 
-    const modes = ["fit-fill","fit-contain","fit-cover"];
-    const names = ["تمدد","ملاءمة","قص"];
+  qualityBtn.onclick = e => { e.stopPropagation(); flash("الجودة حسب المصدر"); showControls(); };
+  ccBtn.onclick = e => { e.stopPropagation(); flash("الترجمة حسب المصدر"); showControls(); };
+  audioBtn.onclick = e => { e.stopPropagation(); flash("الصوت حسب المصدر"); showControls(); };
+  castBtn.onclick = e => { e.stopPropagation(); flash("ميزة Cast قريباً"); showControls(); };
 
-    video.classList.remove(...modes);
-    fitIndex = (fitIndex + 1) % modes.length;
-    video.classList.add(modes[fitIndex]);
-
-    flash("العرض: " + names[fitIndex]);
+  pipBtn.onclick = async e => {
+    e.stopPropagation();
+    try{
+      if(document.pictureInPictureElement) await document.exitPictureInPicture();
+      else await video.requestPictureInPicture();
+    }catch{ flash("PiP غير مدعوم"); }
     showControls();
   };
 
-  rotateBtn.onclick = e => {
+  fullBtn.onclick = async e => {
     e.stopPropagation();
-
-    rotated = !rotated;
-    video.style.transform = rotated ? "rotate(90deg) scale(1.02)" : "";
-    flash(rotated ? "تم تفعيل التدوير" : "تم إيقاف التدوير");
-    showControls();
-  };
-
-  qualityBtn.onclick = e => {
-    e.stopPropagation();
-
-    if(currentEngine === "hls") buildHlsQuality();
-    if(currentEngine === "shaka") buildShakaQuality();
-
-    qMenu.classList.toggle("visible");
+    try{
+      if(!document.fullscreenElement) await $("wrap").requestFullscreen();
+      else await document.exitFullscreen();
+    }catch{ flash("ملء الشاشة غير مدعوم"); }
     showControls();
   };
 
   progress.onclick = e => {
-    const d = video.duration || 0;
-    if(!(d > 0 && isFinite(d))) return;
-
-    const rect = progress.getBoundingClientRect();
-    const ratio = (e.clientX - rect.left) / rect.width;
-
-    video.currentTime = Math.max(0, Math.min(d, ratio * d));
-    showControls();
+    const d=video.duration||0; if(!(d>0&&isFinite(d))) return;
+    const r=progress.getBoundingClientRect(), x=(e.clientX-r.left)/r.width;
+    video.currentTime=Math.max(0,Math.min(d,x*d)); showControls();
   };
 
   $("retry").onclick = playStream;
   $("back").onclick = () => history.back();
 
-  video.addEventListener("waiting", () => buffer.style.display = "block");
-  video.addEventListener("playing", () => buffer.style.display = "none");
-  video.addEventListener("timeupdate", updateProgress);
-  video.addEventListener("loadedmetadata", updateProgress);
-  video.addEventListener("play", setPlayIcon);
-  video.addEventListener("pause", setPlayIcon);
+  video.addEventListener("waiting",()=>buffer.style.display="block");
+  video.addEventListener("playing",()=>buffer.style.display="none");
+  video.addEventListener("timeupdate",updateProgress);
+  video.addEventListener("loadedmetadata",updateProgress);
+  video.addEventListener("play",setPlayIcon);
+  video.addEventListener("pause",setPlayIcon);
 
   $("wrap").onclick = showControls;
-
-  video.muted = false;
-  video.volume = 1;
 
   setMuteIcon();
   setPlayIcon();
