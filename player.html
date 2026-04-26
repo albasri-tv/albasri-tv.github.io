@@ -23,13 +23,13 @@ video.fit-fill{object-fit:fill!important}
 .server-bar{
   position:absolute;top:16px;left:12px;right:auto;z-index:130;display:none;gap:8px;
   padding:6px;max-width:min(72vw,760px);overflow-x:auto;direction:ltr;
-  background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.12);border-radius:999px;
-  backdrop-filter:blur(12px);scrollbar-width:none;opacity:0;transition:.25s
+  background:transparent;border:0;border-radius:999px;
+  scrollbar-width:none;opacity:0;transition:.25s
 }
 .server-bar::-webkit-scrollbar{display:none}
 .server-bar.visible{display:flex;opacity:1}
 .server-bar.hide{opacity:0;pointer-events:none}
-.server-btn{flex:0 0 auto;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.09);color:#fff;padding:8px 14px;border-radius:999px;font-family:Tajawal,sans-serif;font-weight:800;cursor:pointer;white-space:nowrap}
+.server-btn{flex:0 0 auto;border:1px solid rgba(255,255,255,.30);background:transparent;color:#fff;padding:8px 14px;border-radius:999px;font-family:Tajawal,sans-serif;font-weight:800;cursor:pointer;white-space:nowrap;text-shadow:0 1px 2px #000}
 .server-btn.active{background:#fff;color:#000}
 
 #loading,#buffer{position:absolute;z-index:60;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:5px solid rgba(255,255,255,.25);border-top-color:#fff;animation:spin 1s linear infinite;display:none}
@@ -38,27 +38,27 @@ video.fit-fill{object-fit:fill!important}
 #error{position:absolute;inset:0;z-index:999;background:rgba(0,0,0,.94);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
 #error button{border:0;background:#fff;color:#000;border-radius:999px;padding:11px 18px;font-weight:800;font-family:Tajawal}
 
-.top{position:absolute;top:0;left:0;right:0;z-index:80;padding:14px 16px;background:linear-gradient(to bottom,rgba(0,0,0,.72),transparent);display:flex;justify-content:flex-end;align-items:center;opacity:0;transition:.25s;pointer-events:none}
+.top{position:absolute;top:0;left:0;right:0;z-index:80;padding:14px 16px;background:transparent;display:flex;justify-content:flex-end;align-items:center;gap:10px;opacity:0;transition:.25s;pointer-events:none}
 .top.visible,.bottom.visible,.center.visible{opacity:1;pointer-events:auto}
 .title{color:#fff;font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw;text-align:right}
-.btn,.icon{border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.38);color:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(10px)}
+.btn,.icon{border:1px solid rgba(255,255,255,.28);background:transparent;color:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;text-shadow:0 1px 2px #000}
 .btn{width:42px;height:42px}.icon{width:42px;height:42px}
 
 .center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;gap:20px;align-items:center;opacity:0;transition:.25s;z-index:80;pointer-events:none}
 .center.visible{pointer-events:auto}
-.circle{border:1px solid rgba(255,255,255,.22);background:rgba(0,0,0,.42);color:#fff;border-radius:999px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px)}
+.circle{border:1px solid rgba(255,255,255,.28);background:transparent;color:#fff;border-radius:999px;display:flex;align-items:center;justify-content:center;text-shadow:0 1px 2px #000}
 .big{width:76px;height:76px}.seek{width:58px;height:58px;position:relative}.seek .num{position:absolute;font-size:13px;font-weight:900}
 
-.bottom{position:absolute;left:0;right:0;bottom:0;z-index:80;padding:12px 14px calc(15px + env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(0,0,0,.84),transparent);opacity:0;transition:.25s;pointer-events:none}
+.bottom{position:absolute;left:0;right:0;bottom:0;z-index:80;padding:12px 14px calc(15px + env(safe-area-inset-bottom));background:transparent;opacity:0;transition:.25s;pointer-events:none}
 .bottom.visible{pointer-events:auto}
 .progress{height:5px;background:rgba(255,255,255,.25);border-radius:999px;position:relative;margin-bottom:12px;overflow:hidden}
 .played{position:absolute;left:0;top:0;bottom:0;width:0;background:#fff}.thumb{position:absolute;top:50%;left:0;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:#fff}
 .row{display:flex;align-items:center;gap:10px;direction:ltr;width:100%}
-.icons{display:flex;gap:10px;direction:rtl;justify-content:flex-start;flex:1;overflow-x:auto;scrollbar-width:none}
+.icons{display:flex;gap:10px;direction:rtl;justify-content:flex-end;flex:1;overflow-x:auto;scrollbar-width:none}
 .icons::-webkit-scrollbar{display:none}
 .time{color:#fff;font-size:14px;direction:ltr;min-width:110px;text-align:left;flex:0 0 auto}
 .live{display:none;color:#fff;font-weight:900;align-items:center;gap:7px;direction:ltr;flex:0 0 auto}.live span{width:8px;height:8px;background:red;border-radius:50%;box-shadow:0 0 10px red}
-.menu{position:absolute;bottom:76px;right:12px;left:auto;z-index:100;min-width:190px;background:rgba(0,0,0,.9);border:1px solid rgba(255,255,255,.16);border-radius:15px;padding:7px;display:none;backdrop-filter:blur(12px)}
+.menu{position:absolute;bottom:76px;right:12px;left:auto;z-index:100;min-width:190px;background:#000;border:1px solid rgba(255,255,255,.16);border-radius:15px;padding:7px;display:none}
 .menu.visible{display:block}.menu button{width:100%;border:0;background:transparent;color:#fff;padding:12px;border-radius:12px;text-align:right;font-family:Tajawal;font-weight:700}.menu button.active,.menu button:hover{background:rgba(255,255,255,.15)}
 #toast{position:absolute;bottom:112px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;padding:8px 14px;border-radius:999px;display:none;z-index:100;font-weight:700}
 
@@ -78,7 +78,7 @@ video.fit-fill{object-fit:fill!important}
 <div class="server-bar" id="serverBar"></div>
 <video id="video" playsinline autoplay webkit-playsinline></video>
 
-<div class="top" id="top"><div class="title" id="title">BSR Player</div></div>
+<div class="top" id="top"><button class="btn" id="back" title="رجوع"><i data-feather="arrow-right"></i></button><div class="title" id="title">BSR Player</div></div>
 <div id="loading"></div><div id="buffer"></div>
 
 <div id="error"><i data-feather="alert-triangle"></i><h3 id="errTitle">خطأ في المشغل</h3><p id="errMsg">تعذر تشغيل الرابط</p><button id="retry">إعادة التحميل</button></div>
@@ -92,6 +92,8 @@ video.fit-fill{object-fit:fill!important}
 <div class="bottom" id="bottom">
   <div class="progress" id="progress"><div class="played" id="played"></div><div class="thumb" id="thumb"></div></div>
   <div class="row">
+    <div class="time" id="time">00:00 • 00:00</div>
+    <div class="live" id="live"><span></span>LIVE</div>
     <div class="icons">
       <button class="icon" id="fullBtn" title="ملء الشاشة"><i data-feather="maximize"></i></button>
       <button class="icon" id="pipBtn" title="نافذة صغيرة"><i data-feather="airplay"></i></button>
@@ -101,8 +103,6 @@ video.fit-fill{object-fit:fill!important}
       <button class="icon" id="mute" title="الصوت"><i data-feather="volume-x"></i></button>
       <button class="icon" id="fit" title="تغيير العرض"><i data-feather="maximize-2"></i></button>
     </div>
-    <div class="live" id="live"><span></span>LIVE</div>
-    <div class="time" id="time">00:00 • 00:00</div>
   </div>
 </div>
 
@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const video = $("video"), topBar = $("top"), bottom = $("bottom"), center = $("center"), loading = $("loading"), buffer = $("buffer"), errorBox = $("error");
   const errTitle = $("errTitle"), errMsg = $("errMsg"), titleEl = $("title"), playBtn = $("play"), muteBtn = $("mute"), fitBtn = $("fit"), qualityBtn = $("quality"), ccBtn = $("ccBtn"), castBtn = $("castBtn"), pipBtn = $("pipBtn"), fullBtn = $("fullBtn"), qMenu = $("qMenu"), progress = $("progress"), played = $("played"), thumb = $("thumb"), time = $("time"), live = $("live"), toast = $("toast"), serverBar = $("serverBar"), wrap = $("wrap");
   const WORKER = "https://ali.albesriali8.workers.dev/";
-  let hls = null, shakaPlayer = null, hideTimer = null, fitIndex = 0, serverList = [], activeServerIndex = 0, firstTapDone = false;
+  let hls = null, shakaPlayer = null, hideTimer = null, fitIndex = 0, serverList = [], activeServerIndex = 0;
 
   const getP = () => new URLSearchParams(location.search);
   const get = k => { let v = getP().get(k)||""; try{v=decodeURIComponent(v)}catch{} return v; };
@@ -184,9 +184,9 @@ document.addEventListener("DOMContentLoaded", () => {
   fullBtn.onclick=async e=>{e.stopPropagation();await forceMobileFullscreen();showControls()};
   progress.onclick=e=>{const d=video.duration||0;if(!(d>0&&isFinite(d)))return;const r=progress.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;video.currentTime=Math.max(0,Math.min(d,x*d));showControls()};
   $("retry").onclick=playStream;
+  $("back").onclick=e=>{e.stopPropagation();history.back()};
   video.addEventListener("waiting",()=>buffer.style.display="block");video.addEventListener("playing",()=>buffer.style.display="none");video.addEventListener("timeupdate",updateProgress);video.addEventListener("loadedmetadata",updateProgress);video.addEventListener("play",setPlayIcon);video.addEventListener("pause",setPlayIcon);
-  wrap.onclick=async()=>{if(!firstTapDone){firstTapDone=true;await forceMobileFullscreen();await video.play().catch(()=>{})}showControls()};
-  document.addEventListener("fullscreenchange",()=>{if(document.fullscreenElement)hideControls()});
+  wrap.onclick=()=>{showControls()};
   setMuteIcon();setPlayIcon();showControls();buildServerButtons();playStream();setTimeout(hideControls,3200);
 });
 </script>
