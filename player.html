@@ -2,8 +2,8 @@
 <html dir="rtl" lang="ar">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>BSR Player</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<title>BSR Player Mobile</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
@@ -12,8 +12,8 @@
 
 <style>
 *{box-sizing:border-box;user-select:none}
-html,body{margin:0;padding:0;width:100%;height:100%;background:#000;font-family:Tajawal,sans-serif;overflow:hidden}
-#player-root,.player-wrapper{position:fixed;inset:0;background:#000}
+html,body{margin:0;padding:0;width:100%;height:100%;height:100dvh;background:#000;font-family:Tajawal,sans-serif;overflow:hidden;overscroll-behavior:none;touch-action:manipulation}
+#player-root,.player-wrapper{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;background:#000;overflow:hidden}
 video{width:100%;height:100%;background:#000;object-fit:fill;filter:contrast(1.06) saturate(1.12)}
 video.fit-contain{object-fit:contain!important}
 video.fit-cover{object-fit:cover!important}
@@ -21,14 +21,14 @@ video.fit-fill{object-fit:fill!important}
 
 .server-bar{
   position:absolute;
-  top:62px;
-  left:0;
+  top:max(12px,calc(env(safe-area-inset-top) + 10px));
+  left:max(10px,env(safe-area-inset-left));
   right:auto;
-  z-index:130;
+  z-index:140;
   display:none;
   gap:8px;
-  padding:8px 12px;
-  max-width:100%;
+  padding:8px 10px;
+  max-width:calc(100vw - 20px);
   overflow-x:auto;
   direction:ltr;
 }
@@ -89,19 +89,19 @@ color:#fff;border-radius:999px;display:flex;align-items:center;justify-content:c
 .seek .num{position:absolute;font-size:13px;font-weight:900}
 
 .bottom{
-position:absolute;left:0;right:0;bottom:0;z-index:80;padding:12px 14px 15px;
+position:absolute;left:0;right:0;bottom:0;z-index:80;padding:12px 14px max(15px,calc(env(safe-area-inset-bottom) + 10px));
 background:linear-gradient(to top,rgba(0,0,0,.84),transparent);opacity:0;transition:.25s
 }
 .progress{height:5px;background:rgba(255,255,255,.25);border-radius:999px;position:relative;margin-bottom:12px;overflow:hidden}
 .played{position:absolute;left:0;top:0;bottom:0;width:0;background:#fff}
 .thumb{position:absolute;top:50%;left:0;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:#fff}
-.row{display:flex;align-items:center;gap:10px;direction:rtl}
-.icons{display:flex;gap:10px;direction:ltr;justify-content:flex-start;flex:1}
-.time{color:#fff;font-size:14px;direction:ltr;min-width:110px;text-align:left}
-.live{display:none;color:#fff;font-weight:900;align-items:center;gap:7px}
+.row{display:flex;align-items:center;gap:10px;direction:ltr}
+.icons{display:flex;gap:10px;direction:rtl;justify-content:flex-end;flex:1;order:2;overflow-x:auto;padding-right:max(0px,env(safe-area-inset-right))}
+.time{color:#fff;font-size:14px;direction:ltr;min-width:110px;text-align:left;order:1}
+.live{display:none;color:#fff;font-weight:900;align-items:center;gap:7px;order:1}
 .live span{width:8px;height:8px;background:red;border-radius:50%;box-shadow:0 0 10px red}
 .menu{
-position:absolute;bottom:68px;left:12px;z-index:100;min-width:180px;background:rgba(0,0,0,.88);
+position:absolute;bottom:68px;right:12px;z-index:100;min-width:180px;background:rgba(0,0,0,.88);
 border:1px solid rgba(255,255,255,.16);border-radius:15px;padding:7px;display:none
 }
 .menu.visible{display:block}
@@ -111,6 +111,18 @@ border:1px solid rgba(255,255,255,.16);border-radius:15px;padding:7px;display:no
 position:absolute;bottom:112px;left:50%;transform:translateX(-50%);
 background:rgba(0,0,0,.65);color:#fff;padding:7px 13px;border-radius:999px;display:none;z-index:100
 }
+
+@media (max-width:768px){
+  .top{padding-top:max(10px,calc(env(safe-area-inset-top) + 8px))}
+  .title{max-width:54vw}
+  .server-btn{padding:7px 12px;font-size:13px}
+  .icons{gap:8px}
+  .icon{width:38px;height:38px;border-radius:13px}
+  .btn{width:40px;height:40px}
+  .big{width:70px;height:70px}
+  .seek{width:54px;height:54px}
+}
+
 </style>
 </head>
 
@@ -204,6 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
     serverBar.querySelectorAll(".server-btn").forEach(btn=>{
       btn.onclick = async e => {
         e.stopPropagation();
+        await enterMobileFullscreen();
         activeServerIndex = +btn.dataset.index;
         serverBar.querySelectorAll(".server-btn").forEach(x=>x.classList.remove("active"));
         btn.classList.add("active");
@@ -231,11 +244,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const showControls = () => {
     topBar.classList.add("visible"); bottom.classList.add("visible"); center.classList.add("visible");
+    if(serverList.length) serverBar.classList.add("visible");
     clearTimeout(hideTimer);
-    hideTimer = setTimeout(()=>{ topBar.classList.remove("visible"); bottom.classList.remove("visible"); center.classList.remove("visible"); qMenu.classList.remove("visible"); }, 2800);
+    hideTimer = setTimeout(()=>{
+      topBar.classList.remove("visible");
+      bottom.classList.remove("visible");
+      center.classList.remove("visible");
+      qMenu.classList.remove("visible");
+      serverBar.classList.remove("visible");
+    }, 2600);
   };
 
   const flash = t => { toast.textContent=t; toast.style.display="block"; setTimeout(()=>toast.style.display="none",1300); };
+
+  async function enterMobileFullscreen(){
+    try{
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || innerWidth <= 900;
+      if(isMobile && !document.fullscreenElement){
+        await $("wrap").requestFullscreen({ navigationUI:"hide" }).catch(()=>{});
+      }
+    }catch{}
+  }
+
   const setPlayIcon = () => { playBtn.innerHTML=`<i data-feather="${video.paused?'play':'pause'}"></i>`; feather.replace(); };
   const setMuteIcon = () => { muteBtn.innerHTML=`<i data-feather="${video.muted?'volume-x':'volume-2'}"></i>`; feather.replace(); };
   const fmt = s => !isFinite(s)||s<0 ? "00:00" : `${Math.floor(s/60)%60}`.padStart(2,"0")+":"+`${Math.floor(s%60)}`.padStart(2,"0");
@@ -323,7 +353,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  playBtn.onclick = async e => { e.stopPropagation(); if(video.paused) await video.play().catch(()=>{}); else video.pause(); setPlayIcon(); showControls(); };
+  playBtn.onclick = async e => { e.stopPropagation(); await enterMobileFullscreen(); if(video.paused) await video.play().catch(()=>{}); else video.pause(); setPlayIcon(); showControls(); };
   $("rew").onclick = e => { e.stopPropagation(); if(isFinite(video.duration)) video.currentTime=Math.max(0,video.currentTime-5); showControls(); };
   $("fwd").onclick = e => { e.stopPropagation(); if(isFinite(video.duration)) video.currentTime=Math.min(video.duration,video.currentTime+15); showControls(); };
 
@@ -351,6 +381,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   fullBtn.onclick = async e => {
     e.stopPropagation();
+    await enterMobileFullscreen();
     try{
       if(!document.fullscreenElement) await $("wrap").requestFullscreen();
       else await document.exitFullscreen();
@@ -374,7 +405,12 @@ document.addEventListener("DOMContentLoaded", () => {
   video.addEventListener("play",setPlayIcon);
   video.addEventListener("pause",setPlayIcon);
 
-  $("wrap").onclick = showControls;
+  $("wrap").onclick = async () => { await enterMobileFullscreen(); showControls(); };
+
+
+  ["touchstart","pointerdown","click"].forEach(ev=>{
+    document.addEventListener(ev, enterMobileFullscreen, { once:true, passive:true });
+  });
 
   setMuteIcon();
   setPlayIcon();
