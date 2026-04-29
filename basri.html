@@ -116,8 +116,6 @@ watch soccer live hd
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.13/shaka-player.compiled.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
 :root{
@@ -636,8 +634,12 @@ video.fit-fill{object-fit:fill!important}
 </header>
 
 <div id="page">
-  <div class="empty">جاري تحميل المباريات...</div>
+  <div class="empty">هنا سيتم وضع الكود</div>
 </div>
+
+<!-- هنا سيتم وضع كود المباريات المختصر المولد من لوحة الأدمن -->
+
+<script>window.BSR_MATCHES="BSR:eyJtIjpbeyJoIjoi2YbZiNiq2YrZhti62YfYp9mFIiwiYSI6Itij2LPYqtmI2YYg2YHZitmE2KciLCJobCI6Imh0dHBzOi8vaW1hZ2VzLndlc2Vydi5ubC8_dXJsPWh0dHBzJTNBJTJGJTJGaW1ncy55c3Njb3Jlcy5jb20lMkZ0ZWFtcyUyRjY0JTJGNzc0MTY5MDExOTAwNy5wbmcmZXJyb3JyZWRpcmVjdD1odHRwcyUzQSUyRiUyRmltYWdlcy53ZXNlcnYubmwlMkYlM0Z1cmwlM0RodHRwcyUzQSUyRiUyRmltZ3MueXNzY29yZXMuY29tJTJGdGVhbXMlMkY3NzQxNjkwMTE5MDA3LnBuZyIsImFsIjoiaHR0cHM6Ly9pbWFnZXMud2VzZXJ2Lm5sLz91cmw9aHR0cHMlM0ElMkYlMkZpbWdzLnlzc2NvcmVzLmNvbSUyRnRlYW1zJTJGNjQlMkY5OTIxNzIzNDE0ODcwLnBuZyZlcnJvcnJlZGlyZWN0PWh0dHBzJTNBJTJGJTJGaW1hZ2VzLndlc2Vydi5ubCUyRiUzRnVybCUzRGh0dHBzJTNBJTJGJTJGaW1ncy55c3Njb3Jlcy5jb20lMkZ0ZWFtcyUyRjk5MjE3MjM0MTQ4NzAucG5nIiwidCI6IjIyOjAwOjAwIiwiZCI6IjIwMjYtMDQtMzAiLCJzdCI6ItmE2YUg2KrYqNiv2KMiLCJocyI6IjAiLCJhcyI6IjAiLCJzIjpbeyJuIjoi2KfZhNir2KfZhdmG2KkgMSIsInUiOiJodHRwczovL2JiYi5leG9hZGFzaC5jb20vVFZEMTQ1MS9pbmRleC5tcGQiLCJ1YSI6IiIsInIiOiIiLCJvIjoiIiwiY2siOiIiLCJwbSI6ImRpcmVjdCJ9XX1dfQ";if(window.loadBsrMatchesFromCode)window.loadBsrMatchesFromCode(window.BSR_MATCHES);</script>
 
 <div id="playerRoot">
   <div class="player-wrapper">
@@ -699,18 +701,7 @@ video.fit-fill{object-fit:fill!important}
 document.addEventListener("DOMContentLoaded", function(){
   feather.replace();
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAGhmOqXWxmr2ULOzNMMDuLlxCeTmUNpis",
-    databaseURL: "https://frsin-araq-default-rtdb.firebaseio.com",
-    projectId: "frsin-araq",
-    storageBucket: "frsin-araq.firebasestorage.app",
-    messagingSenderId: "813355696991",
-    appId: "1:813355696991:android:4a58ec98591210bf77acea"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
+  // تم حذف Firebase بالكامل. المباريات تُقرأ من الكود المختصر الذي يولده ملف الأدمن.
   const WORKER_BASE = "https://ali.albesriali8.workers.dev/";
 
   const page = document.getElementById("page");
@@ -917,21 +908,57 @@ document.addEventListener("DOMContentLoaded", function(){
     return card;
   }
 
-  db.ref("matches").on("value", function(snap){
-    const data = snap.val() || {};
-    const list = Object.values(data).filter(function(m){
-      return m && (
-        m.published === true ||
-        m.published === "true" ||
-        m.isPublished === true ||
-        m.isPublished === "true"
-      );
-    });
+  function decodeBsrPayload(code){
+    try{
+      if(!code) return [];
+      code = String(code).trim();
+      if(code.indexOf('BSR:') === 0) code = code.slice(4);
+      code = code.replace(/-/g, '+').replace(/_/g, '/');
+      while(code.length % 4) code += '=';
+      const json = decodeURIComponent(escape(atob(code)));
+      const data = JSON.parse(json);
+      const arr = Array.isArray(data) ? data : (Array.isArray(data.m) ? data.m : []);
 
+      return arr.map(function(x){
+        const servers = Array.isArray(x.s) ? x.s.map(function(v){
+          return {
+            label: v.n || v.l || 'Server',
+            url: v.u || '',
+            userAgent: v.ua || '',
+            referer: v.r || '',
+            origin: v.o || '',
+            drmKey: v.ck || '',
+            playMode: v.pm || 'worker'
+          };
+        }) : [];
+
+        return {
+          home: x.h || 'الفريق الأول',
+          away: x.a || 'الفريق الثاني',
+          homeLogo: x.hl || '',
+          awayLogo: x.al || '',
+          time: x.t || '',
+          date: x.d || '',
+          statusText: x.st || 'لم تبدأ',
+          homeScore: x.hs || '0',
+          awayScore: x.as || '0',
+          servers: servers,
+          qualities: servers,
+          published: true,
+          isPublished: true
+        };
+      });
+    }catch(e){
+      console.error('BSR code decode error', e);
+      return [];
+    }
+  }
+
+  function renderGeneratedMatches(list){
     page.innerHTML = "";
 
-    if(!list.length){
-      page.innerHTML = '<div class="empty">لا توجد مباريات ظاهرة حالياً</div>';
+    if(!list || !list.length){
+      page.innerHTML = '<div class="empty">لا توجد مباريات ظاهرة حالياً<br><small>أضف كود المباريات المختصر المولد من لوحة الأدمن داخل هذه الصفحة.</small></div>';
       return;
     }
 
@@ -944,7 +971,14 @@ document.addEventListener("DOMContentLoaded", function(){
     });
 
     feather.replace();
-  });
+  }
+
+  window.loadBsrMatchesFromCode = function(code){
+    window.BSR_MATCHES = code;
+    renderGeneratedMatches(decodeBsrPayload(code));
+  };
+
+  renderGeneratedMatches(decodeBsrPayload(window.BSR_MATCHES || window.BSR_MATCHES_CODE || ''));
 
   function setThemeIcon(){
     const icon = document.body.classList.contains("light") ? "sun" : "moon";
@@ -1090,9 +1124,14 @@ document.addEventListener("DOMContentLoaded", function(){
   }
 
   function shouldUseWorker(src){
-    // تشغيل كل الروابط عبر Worker حتى لا تتوقف الروابط التي تحتاج Headers أو Range
+    const u = String((src && src.url) || '').toLowerCase();
+    const mode = String((src && (src.playMode || src.pm)) || '').toLowerCase();
+    // روابط MPD المفتوحة مثل الثامنة تعمل مباشرة داخل Shaka بدون مفتاح
+    if(mode === 'direct') return false;
+    if(u.includes('.mpd')) return false;
     return true;
   }
+
 
   function getPlayUrl(src){
     if(shouldUseWorker(src)) return buildProxyUrl(src);
