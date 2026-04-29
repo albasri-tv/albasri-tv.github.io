@@ -1,0 +1,161 @@
+<!-- مولد بطاقات المباريات -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مولد بطاقات المباريات</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+const-PAGE-BG-USE-IN-JS{}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Tahoma,sans-serif;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+body{background:#d33535;color:white;overflow-x:hidden}
+.app{min-height:100vh;background-image:linear-gradient(rgba(211,53,53,.18),rgba(211,53,53,.18)),var(--generator-bg);background-size:cover;background-position:center;background-attachment:fixed}
+.topbar{background:#bd0000;padding:12px;position:sticky;top:0;z-index:50}
+.title{text-align:center;font-size:22px;font-weight:900;margin-bottom:10px}
+.controls{display:grid;grid-template-columns:1fr auto;gap:8px}
+input,textarea{width:100%;border:0;outline:0;border-radius:10px;padding:12px;font-size:15px;font-weight:700}
+textarea{min-height:250px;direction:ltr;font-family:Consolas,monospace}
+button{border:0;border-radius:10px;padding:11px 14px;font-weight:900;cursor:pointer}
+.btn-blue{background:#2563eb;color:white}
+.btn-green{background:#10b981;color:#001b10}
+.btn-red{background:#ef4444;color:white}
+.matches{padding:10px 8px 30px;display:grid;grid-template-columns:1fr;gap:18px}
+.match-card{background:white;border:4px solid #9a0000;border-radius:12px;padding:16px 10px 18px;box-shadow:0 2px 5px rgba(0,0,0,.22);overflow:hidden}
+.teams-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
+.team{display:flex;flex-direction:column;align-items:center;min-width:0}
+.team img{width:clamp(54px,14vw,78px);height:clamp(54px,14vw,78px);object-fit:contain;margin-bottom:8px}
+.team-name{color:#9a0000;font-size:clamp(14px,3.7vw,20px);font-weight:900;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status{color:white;font-size:clamp(14px,4vw,20px);font-weight:900;padding:10px 18px;border-radius:28px;white-space:nowrap;text-align:center}
+.info{margin-top:24px;color:#777;text-align:center}
+.league{font-size:clamp(16px,4vw,21px);margin-bottom:14px;font-weight:600}
+.league i{margin-left:8px}
+.go-box{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px;direction:ltr}
+.go-box input{border:2px solid #9a0000;color:#9a0000;text-align:left}
+.output{background:white;border:4px solid #9a0000;border-radius:12px;margin:10px 8px 30px;padding:12px;color:#9a0000}
+.output-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-weight:900}
+.empty{background:white;border:4px solid #9a0000;border-radius:12px;padding:25px;text-align:center;color:#9a0000;font-size:20px;font-weight:900}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#111827;color:white;border-radius:999px;padding:12px 16px;display:none;z-index:99}
+@media(max-width:700px){.controls{grid-template-columns:1fr}.go-box{grid-template-columns:1fr}}
+@media(min-width:700px){.matches{grid-template-columns:repeat(auto-fit,minmax(420px,1fr));padding:18px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="title">مولد بطاقات المباريات</div>
+    <div class="controls">
+      <input type="date" id="dateInput">
+      <button class="btn-blue" onclick="loadMatches()">جلب المباريات</button>
+    </div>
+  </div>
+
+  <div class="matches" id="matchesRoot">
+    <div class="empty">اضغط جلب المباريات</div>
+  </div>
+
+  <div class="output">
+    <div class="output-head">
+      <span>الكود الجاهز للنسخ</span>
+      <span id="counter">0 مباراة</span>
+    </div>
+    <textarea id="outputCode" readonly placeholder="سيظهر هنا كود const matches..."></textarea>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button class="btn-green" onclick="generateCode()">توليد الكود</button>
+      <button class="btn-blue" onclick="copyCode()">نسخ الكود</button>
+      <button class="btn-red" onclick="clearAll()">مسح الكل</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GENERATOR_BG = "https://up6.cc/2026/04/177741237231511.png";
+document.documentElement.style.setProperty("--generator-bg", `url('${GENERATOR_BG}')`);
+
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("selectstart", e => e.preventDefault());
+document.addEventListener("dragstart", e => e.preventDefault());
+
+const API_BASE64 = "aHR0cHM6Ly9hcGktYXIueXNzY29yZXMuY29tL2FwaS9tYXRjaGVzL21hdGNoZXNfZGF0ZV9nZXQve2RhdGV9LyU1QiUyMjk5Mzc2JTIyLCUyMjQwODM0MCUyMiU1RC8lNUIlNUQvJTVCJTIyODYzMyUyMiU1RC9ELzE4MA==";
+
+let currentMatches = [];
+let selectedMatches = [];
+
+function getApiUrl(date){ return decodeURIComponent(escape(atob(API_BASE64))).replace("{date}", date); }
+function toast(text){ const t=document.getElementById("toast"); t.textContent=text; t.style.display="block"; setTimeout(()=>t.style.display="none",1800); }
+function setToday(){ const d=new Date(); document.getElementById("dateInput").value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
+function getLogo(img){ return img ? "https://imgs.ysscores.com/teams/64/"+img : "https://via.placeholder.com/80?text=Team"; }
+function arTime(t){ if(!t) return "00:00"; const p=t.split(":"); let h=+p[0]||0; const m=p[1]||"00"; const a=h>=12?"م":"ص"; h=h%12||12; return h+":"+m+" "+a; }
+function getStatus(status,date,time){
+  const now=Date.now(), mt=new Date((date||"")+"T"+(time||"00:00:00")).getTime();
+  if(+status===4) return {text:"إنتهت المباراة", bg:"#64748b", code:"end"};
+  if([1,2,3].includes(+status)||(mt&&now>=mt)) return {text:"جارية الآن", bg:"#ef4444", code:"live"};
+  return {text:"لم تبدأ", bg:"#10b981", code:"soon"};
+}
+function makeId(text){ return text.toLowerCase().replace(/[^\u0600-\u06FFa-z0-9]+/g,"_").replace(/^_+|_+$/g,""); }
+function normalizeMatch(m){
+  const home=m.home_team?.title||"", away=m.away_team?.title||"", date=m.match_date||document.getElementById("dateInput").value, timeRaw=m.match_time||"", st=getStatus(m.status,date,timeRaw);
+  return {id:makeId(home+"_"+away+"_"+date),home,away,homeLogo:getLogo(m.home_team?.image||""),awayLogo:getLogo(m.away_team?.image||""),time:arTime(timeRaw),date,status:st.code,statusText:st.text,statusBg:st.bg,homeScore:m.home_scores||"0",awayScore:m.away_scores||"0",league:m.championship_name||"",commentator:"غير محدد",channel:"غير محدد",link:""};
+}
+async function fetchJson(api){
+  const urls=[api,"https://api.allorigins.win/raw?url="+encodeURIComponent(api),"https://api.codetabs.com/v1/proxy/?quest="+encodeURIComponent(api)];
+  for(const url of urls){ try{ const r=await fetch(url,{cache:"no-store"}); if(!r.ok) throw 0; return await r.json(); }catch(e){} }
+  throw new Error("فشل جلب المباريات");
+}
+async function loadMatches(){
+  const root=document.getElementById("matchesRoot");
+  root.innerHTML=`<div class="empty">جاري جلب المباريات...</div>`;
+  try{
+    const data=await fetchJson(getApiUrl(document.getElementById("dateInput").value));
+    const raw=Array.isArray(data)?data:(Array.isArray(data.data)?data.data:[]);
+    currentMatches=raw.map(normalizeMatch);
+    renderMatches();
+    toast("تم جلب المباريات");
+  }catch(e){ root.innerHTML=`<div class="empty">${e.message}</div>`; }
+}
+function renderMatches(){
+  const root=document.getElementById("matchesRoot");
+  if(!currentMatches.length){ root.innerHTML=`<div class="empty">لا توجد مباريات</div>`; return; }
+  root.innerHTML=currentMatches.map((m,i)=>`
+    <div class="match-card">
+      <div class="teams-row">
+        <div class="team"><img src="${m.homeLogo}"><div class="team-name">${m.home}</div></div>
+        <div class="status" style="background:${m.statusBg}">${m.statusText}</div>
+        <div class="team"><img src="${m.awayLogo}"><div class="team-name">${m.away}</div></div>
+      </div>
+      <div class="info">
+        <div class="league"><i class="fa-solid fa-trophy"></i>${m.league||"بدون بطولة"}</div>
+        <div class="go-box">
+          <input id="go-${i}" placeholder="اكتب اسم GO فقط مثال: pn">
+          <button class="btn-green" onclick="addMatch(${i})">إضافة المباراة</button>
+        </div>
+      </div>
+    </div>`).join("");
+}
+function addMatch(i){
+  const m=currentMatches[i], goName=document.getElementById("go-"+i).value.trim();
+  if(!goName){ toast("اكتب اسم GO أولاً"); return; }
+  const cleanGo=goName.replace(/^go:/i,"").replace(/\s+/g,"_");
+  const item={...m,channel:cleanGo,link:"go:"+cleanGo};
+  const ex=selectedMatches.find(x=>x.id===item.id);
+  ex ? Object.assign(ex,item) : selectedMatches.push(item);
+  document.getElementById("counter").textContent=selectedMatches.length+" مباراة";
+  generateCode(false);
+  toast("تمت إضافة المباراة");
+}
+function generateCode(show=true){
+  document.getElementById("outputCode").value = selectedMatches.length ? "const matches = "+JSON.stringify(selectedMatches,null,2)+";" : "";
+  if(show) toast(selectedMatches.length?"تم توليد الكود":"أضف مباراة أولاً");
+}
+async function copyCode(){
+  const code=document.getElementById("outputCode").value;
+  if(!code){ toast("لا يوجد كود للنسخ"); return; }
+  try{ await navigator.clipboard.writeText(code); toast("تم نسخ الكود"); }catch(e){ document.getElementById("outputCode").select(); document.execCommand("copy"); toast("تم النسخ"); }
+}
+function clearAll(){ selectedMatches=[]; document.getElementById("outputCode").value=""; document.getElementById("counter").textContent="0 مباراة"; toast("تم مسح الكل"); }
+setToday();
+</script>
+</body>
+</html>
